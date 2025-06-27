@@ -1,5 +1,5 @@
 import enum
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, List, Tuple
 
 from .container import Container
 
@@ -48,3 +48,21 @@ class Trough(Container):
     )
     self.through_base_to_container_base = through_base_to_container_base
     self.bottom_type = bottom_type
+
+    self.tracker.register_callback(self._state_updated)
+
+  def serialize(self) -> dict:
+    return {**super().serialize(), "max_volume": self.max_volume}
+
+  def set_liquids(self, liquids: List[Tuple[Optional["Liquid"], float]]):
+    """Set the liquids in the tube.
+
+    (wraps :meth:`~.VolumeTracker.set_liquids`)
+
+    Example:
+      Set the liquids in a tube to 10 uL of water:
+
+      >>> tube.set_liquids([(Liquid.WATER, 10)])
+    """
+
+    self.tracker.set_liquids(liquids)

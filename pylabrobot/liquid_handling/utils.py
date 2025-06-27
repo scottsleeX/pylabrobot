@@ -10,8 +10,8 @@ MIN_SPACING_EDGE = 2
 
 def _get_centers_with_margin(dim_size: float, n: int, margin: float, min_spacing: float):
   """Get the centers of the channels with a minimum margin on the edges."""
-  if dim_size < margin * 2 + (n - 1) * min_spacing:
-    raise ValueError("Resource is too small to space channels.")
+  # if dim_size < margin * 2 + (n - 1) * min_spacing:
+  #   raise ValueError("Resource is too small to space channels.")
   if dim_size - (n - 1) * min_spacing <= min_spacing * 2:
     remaining_space = dim_size - (n - 1) * min_spacing - margin * 2
     return [margin + remaining_space / 2 + i * min_spacing for i in range(n)]

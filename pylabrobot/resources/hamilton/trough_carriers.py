@@ -40,7 +40,7 @@ def Trough_CAR_4R200_A00(name: str) -> TroughCarrier:
     model="Trough_CAR_4R200_A00",
   )
 
-def Trough_CAR_5R60_A00(name: str) -> TroughCarrier:
+def Trough_CAR_5X60_A00(name: str) -> TroughCarrier:
   """Hamilton cat. no.: 185436
   Hamilton name: 'RGT_CAR_4R200_A00'.
   Trough carrier for 4x 200ml troughs. 2 tracks(T) wide.
@@ -72,5 +72,5 @@ def Trough_CAR_5R60_A00(name: str) -> TroughCarrier:
       resource_size_y=118.0,
       name_prefix=name,
     ),
-    model="Trough_CAR_5R60_A00",
+    model="Trough_CAR_5X60_A00",
   )

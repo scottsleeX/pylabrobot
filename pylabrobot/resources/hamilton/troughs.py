@@ -106,7 +106,7 @@ def Hamilton_1_trough_60ml_Vb(name: str) -> Trough:
     - size_x=34.0,
     - size_y=115.0,
     - size_z=92.0,
-  Compatible with Trough_CAR_5R60_A00 (185436).
+  Compatible with Trough_CAR_5X60_A00 (185436).
   """
   return Trough(
     name=name,

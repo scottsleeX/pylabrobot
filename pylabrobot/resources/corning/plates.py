@@ -168,3 +168,95 @@ def Cos_96_DWP_2mL_Vb(name: str, with_lid: bool = False) -> Plate:
 
 def Cos_96_wellplate_2mL_Vb(name: str, with_lid: bool = False) -> Plate:
   raise NotImplementedError("deprecated. use Cor_96_wellplate_2mL_Vb instead")
+
+
+
+
+
+
+# # # # # # # # # # Cor_96_wellplate_1mL_Vb # # # # # # # # # #
+
+
+def Cor_96_wellplate_1mL_Vb(name: str, with_lid: bool = False) -> Plate:
+  """
+  Corning cat. no.: 3960
+  - manufacturer_link: https://ecatalog.corning.com/life-sciences/b2b/UK/en/Genomics-%26-
+    Molecular-Biology/Automation-Consumables/Deep-Well-Plate/Corning%C2%AE-96-well-
+    Polypropylene-Storage-Blocks/p/3960
+  - brand: Corning
+  - distributor: (Fisher Scientific, 10708212)
+  - material: Polypropylene
+  - sterile: yes
+  - notes:
+      - features uniform skirt heights for greater robotic gripping surface.
+  """
+  return Plate(
+    name=name,
+    size_x=127.0,
+    size_y=86.0,
+    size_z=22.5,
+    lid=Cor_96_wellplate_1mL_Vb_Lid(name=name + "_lid") if with_lid else None,
+    model="Cor_Cos_96_wellplate_1mL_Vb",
+    ordered_items=create_ordered_items_2d(
+      Well,
+      num_items_x=12,
+      num_items_y=8,
+      dx=9.6,
+      dy=7.0,
+      dz=1.2,
+      item_dx=9.0,
+      item_dy=9.0,
+      size_x=8.0,
+      size_y=8.0,
+      size_z=42.0,
+      bottom_type=WellBottomType.V,
+      material_z_thickness=1.25,
+      cross_section_type=CrossSectionType.RECTANGLE,
+      compute_volume_from_height=_compute_volume_from_height_Cor_96_wellplate_1mL_Vb,
+      compute_height_from_volume=_compute_height_from_volume_Cor_96_wellplate_1mL_Vb,
+    ),
+  )
+
+
+def Cor_96_wellplate_1mL_Vb_Lid(name: str) -> Lid:
+  raise NotImplementedError("This lid is not currently defined.")
+
+
+# Volume-height functions
+def _compute_volume_from_height_Cor_96_wellplate_1mL_Vb(
+  h: float,
+) -> float:
+  if h > 44.1:  # 5% tolerance
+    raise ValueError(f"Height {h} is too large for Cor_96_wellplate_1mL_Vb")
+  return calculate_liquid_volume_container_2segments_square_vbottom(
+    x=7.8, y=7.8, h_pyramid=4.0, h_cube=38.0, liquid_height=h
+  )
+
+
+def _compute_height_from_volume_Cor_96_wellplate_1mL_Vb(
+  liquid_volume: float,
+):
+  if liquid_volume > 2_100:  # 5% tolerance
+    raise ValueError(f"Volume {liquid_volume} is too large for Cor_96_wellplate_1mL_Vb")
+  return round(
+    calculate_liquid_height_in_container_2segments_square_vbottom(
+      x=7.8,
+      y=7.8,
+      h_pyramid=4.0,
+      h_cube=38.0,
+      liquid_volume=liquid_volume,
+    ),
+    3,
+  )
+
+
+# Previous names in PLR:
+def Cos_96_DWP_1mL_Vb(name: str, with_lid: bool = False) -> Plate:
+  raise NotImplementedError(
+    "This function is deprecated and will be removed in a future version."
+    " Use 'Cor_96_wellplate_1mL_Vb' instead."
+  )
+
+
+def Cos_96_wellplate_1mL_Vb(name: str, with_lid: bool = False) -> Plate:
+  raise NotImplementedError("deprecated. use Cor_96_wellplate_1mL_Vb instead")

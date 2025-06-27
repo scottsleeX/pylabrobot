@@ -55,21 +55,21 @@ def Trough_CAR_5X60_A00(name: str) -> TroughCarrier:
   """
   return TroughCarrier(
     name=name,
-    size_x=45.0,
+    size_x=21.5,
     size_y=497.0,
-    size_z=71.5,
+    size_z=103,
     # pedestal_size_z=1.5 mm
     sites=create_homogeneous_resources(
       klass=ResourceHolder,
       locations=[
-        Coordinate(4.0, 2.0, 34.0 + 1.5),
-        Coordinate(4.0, 99.06, 34.0 + 1.5),  # TODO: properly define troughs to remove dependency
-        Coordinate(4.0, 196.1, 34.0 + 1.5),  # on this 1.5mm offset (material_z_thickness)
-        Coordinate(4.0, 293.2, 34.0 + 1.5),
-        Coordinate(4.0, 390.3, 34.0 + 1.5),
+        Coordinate(1.25, 6.5, 63.3 + 1.5),
+        Coordinate(1.25, 102.5, 63.3 + 1.5),  # TODO: properly define troughs to remove dependency
+        Coordinate(1.25, 198.5, 63.3 + 1.5),  # on this 1.5mm offset (material_z_thickness)
+        Coordinate(1.25, 294.5, 63.3 + 1.5),
+        Coordinate(1.25, 390.5, 63.3 + 1.5),
       ],
-      resource_size_x=37.0,
-      resource_size_y=118.0,
+      resource_size_x=20.0,
+      resource_size_y=89.9,
       name_prefix=name,
     ),
     model="Trough_CAR_5X60_A00",

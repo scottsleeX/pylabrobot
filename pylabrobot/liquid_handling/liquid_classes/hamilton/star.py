@@ -15003,3 +15003,105 @@ star_mapping[(50, False, True, False, Liquid.WATER, False, True)] = (
   dispense_stop_flow_rate=1.0,
   dispense_stop_back_volume=0.0,
 )
+
+
+
+
+
+########## Custom Liquid Handling
+
+#Master Mix 96 Head, p300
+star_mapping[(300, False, True, True, Liquid.SERUM, False, False)] = (
+  StandardVolumeFilter_96Head_MM_DispenseSurface_Part
+) = HamiltonLiquidClass(
+  curve={300.0: 304, 0.0: 0.0, 100.0: 107, 25.0: 27.5, 290: 300, 250:260, 200: 210, 150: 157.5, 50: 56, 15: 17},
+  aspiration_flow_rate=20.0,
+  aspiration_mix_flow_rate=10.0,
+  aspiration_air_transport_volume=0,
+  aspiration_blow_out_volume=0.0,
+  aspiration_swap_speed=2.0,
+  aspiration_settling_time=3.0,
+  aspiration_over_aspirate_volume=0.0,
+  aspiration_clot_retract_height=0.0,
+  dispense_flow_rate=15.0,
+  dispense_mode=4.0,
+  dispense_mix_flow_rate=1.0,
+  dispense_air_transport_volume=0.0,
+  dispense_blow_out_volume=0.0,
+  dispense_swap_speed=2.0,
+  dispense_settling_time=3.0,
+  dispense_stop_flow_rate=2.0,
+  dispense_stop_back_volume=0.0,
+)
+
+# Master Mix Channels, p1000
+star_mapping[(1000, True, True, True, Liquid.SERUM, False, False)] = (
+  StandardVolumeFilter_Channels_MM_DispenseSurface_Part
+) = HamiltonLiquidClass(
+  curve={1000.0: 1030, 0.0: 0.0, 40: 44, 500: 508, 990: 1008},
+  aspiration_flow_rate=50.0,
+  aspiration_mix_flow_rate=40.0,
+  aspiration_air_transport_volume=0,
+  aspiration_blow_out_volume=0.0,
+  aspiration_swap_speed=2.0,
+  aspiration_settling_time=5.0,
+  aspiration_over_aspirate_volume=10.0,
+  aspiration_clot_retract_height=0.0,
+  dispense_flow_rate=40.0,
+  dispense_mode=4.0,
+  dispense_mix_flow_rate=1.0,
+  dispense_air_transport_volume=0.0,
+  dispense_blow_out_volume=0.0,
+  dispense_swap_speed=2.0,
+  dispense_settling_time=5.0,
+  dispense_stop_flow_rate=5.0,
+  dispense_stop_back_volume=0.0,
+)
+
+# Master Mix Channels, p50
+star_mapping[(50, True, True, True, Liquid.SERUM, False, False)] = (
+  LowVolumeFilter_Channels_MM_DispenseSurface_Part
+) = HamiltonLiquidClass(
+  curve={0.0: 0.0, 50.0: 54.9, 30.0: 33, 10: 11.3, 5: 5.7, 1: 0.7},
+  aspiration_flow_rate=10.0,
+  aspiration_mix_flow_rate=10.0,
+  aspiration_air_transport_volume=0,
+  aspiration_blow_out_volume=0.0,
+  aspiration_swap_speed=2.0,
+  aspiration_settling_time=5.0,
+  aspiration_over_aspirate_volume=2.0,
+  aspiration_clot_retract_height=0.0,
+  dispense_flow_rate=10.0,
+  dispense_mode=4.0,
+  dispense_mix_flow_rate=1.0,
+  dispense_air_transport_volume=0.0,
+  dispense_blow_out_volume=0.0,
+  dispense_swap_speed=2.0,
+  dispense_settling_time=5.0,
+  dispense_stop_flow_rate=5.0,
+  dispense_stop_back_volume=0.0,
+)
+
+# Master Mix Channels, p300
+star_mapping[(300, True, True, True, Liquid.SERUM, False, False)] = (
+  StandardVolumeFilter_Channels_MM_DispenseSurface_Part
+) = HamiltonLiquidClass(
+  curve={300.0: 304, 0.0: 0.0, 100.0: 107, 25.0: 27.5, 290: 300, 250:260, 200: 210, 150: 157.5, 50: 56, 15: 17},
+  aspiration_flow_rate=20.0,
+  aspiration_mix_flow_rate=15.0,
+  aspiration_air_transport_volume=0,
+  aspiration_blow_out_volume=0.0,
+  aspiration_swap_speed=2.0,
+  aspiration_settling_time=5.0,
+  aspiration_over_aspirate_volume=5.0,
+  aspiration_clot_retract_height=0.0,
+  dispense_flow_rate=10.0,
+  dispense_mode=4.0,
+  dispense_mix_flow_rate=1.0,
+  dispense_air_transport_volume=0.0,
+  dispense_blow_out_volume=0.0,
+  dispense_swap_speed=2.0,
+  dispense_settling_time=5.0,
+  dispense_stop_flow_rate=5.0,
+  dispense_stop_back_volume=0.0,
+)

@@ -39,16 +39,21 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
   # _pickup_method_length = 20
   _filter_length = 10
 
-  def __init__(self, num_channels: int = 8):
+  def __init__(self, num_channels: int = 8, activate: bool = True):
     """Initialize a chatter box backend."""
     super().__init__()
     self._num_channels = num_channels
+    self._activate = activate
 
   async def setup(self):
     await super().setup()
+    if not self._activate:
+      pass
     print("Setting up the liquid handler.")
 
   async def stop(self):
+    if not self._activate:
+      pass
     print("Stopping the liquid handler.")
 
   def serialize(self) -> dict:
@@ -59,12 +64,18 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
     return self._num_channels
 
   async def assigned_resource_callback(self, resource: Resource):
+    if not self._activate:
+      pass
     print(f"Resource {resource.name} was assigned to the liquid handler.")
 
   async def unassigned_resource_callback(self, name: str):
+    if not self._activate:
+      pass
     print(f"Resource {name} was unassigned from the liquid handler.")
 
   async def pick_up_tips(self, ops: List[Pickup], use_channels: List[int], **backend_kwargs):
+    if not self._activate:
+      pass
     print("Picking up tips:")
     header = (
       f"{'pip#':<{LiquidHandlerChatterboxBackend._pip_length}} "
@@ -95,6 +106,8 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
       print(row)
 
   async def drop_tips(self, ops: List[Drop], use_channels: List[int], **backend_kwargs):
+    if not self._activate:
+      pass
     print("Dropping tips:")
     header = (
       f"{'pip#':<{LiquidHandlerChatterboxBackend._pip_length}} "
@@ -130,6 +143,8 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
     use_channels: List[int],
     **backend_kwargs,
   ):
+    if not self._activate:
+      pass
     print("Aspirating:")
     header = (
       f"{'pip#':<{LiquidHandlerChatterboxBackend._pip_length}} "
@@ -171,6 +186,8 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
     use_channels: List[int],
     **backend_kwargs,
   ):
+    if not self._activate:
+      pass
     print("Dispensing:")
     header = (
       f"{'pip#':<{LiquidHandlerChatterboxBackend._pip_length}} "
@@ -207,14 +224,20 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
       print(row)
 
   async def pick_up_tips96(self, pickup: PickupTipRack, **backend_kwargs):
+    if not self._activate:
+      pass
     print(f"Picking up tips from {pickup.resource.name}.")
 
   async def drop_tips96(self, drop: DropTipRack, **backend_kwargs):
+    if not self._activate:
+      pass
     print(f"Dropping tips to {drop.resource.name}.")
 
   async def aspirate96(
     self, aspiration: Union[MultiHeadAspirationPlate, MultiHeadAspirationContainer]
   ):
+    if not self._activate:
+      pass
     if isinstance(aspiration, MultiHeadAspirationPlate):
       resource = aspiration.wells[0].parent
     else:
@@ -222,6 +245,8 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
     print(f"Aspirating {aspiration.volume} from {resource}.")
 
   async def dispense96(self, dispense: Union[MultiHeadDispensePlate, MultiHeadDispenseContainer]):
+    if not self._activate:
+      pass
     if isinstance(dispense, MultiHeadDispensePlate):
       resource = dispense.wells[0].parent
     else:
@@ -229,12 +254,18 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
     print(f"Dispensing {dispense.volume} to {resource}.")
 
   async def pick_up_resource(self, pickup: ResourcePickup):
+    if not self._activate:
+      pass
     print(f"Picking up resource: {pickup}")
 
   async def move_picked_up_resource(self, move: ResourceMove):
+    if not self._activate:
+      pass
     print(f"Moving picked up resource: {move}")
 
   async def drop_resource(self, drop: ResourceDrop):
+    if not self._activate:
+      pass
     print(f"Dropping resource: {drop}")
 
   def can_pick_up_tip(self, channel_idx: int, tip: Tip) -> bool:

@@ -478,7 +478,7 @@ def PCR_Plate_96_Well(name: str, with_lid: bool = False) -> TecanPlate:
       Well,
       num_items_x=12,
       num_items_y=8,
-      dx=10.1,
+      dx=8.6, # used to be 10.1
       dy=5.3,
       dz=0.0,
       item_dx=9.0,

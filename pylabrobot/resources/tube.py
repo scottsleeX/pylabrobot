@@ -1,8 +1,16 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Callable, Union
 
 from pylabrobot.resources.container import Container
 from pylabrobot.resources.liquid import Liquid
+import enum
 
+class TubeBottomType(enum.Enum):
+  """Enum for the type of bottom of a tube."""
+
+  FLAT = "flat"
+  U = "U"
+  V = "V"
+  UNKNOWN = "unknown"
 
 class Tube(Container):
   """Tube container, like Eppendorf tubes.
@@ -21,7 +29,12 @@ class Tube(Container):
     material_z_thickness: Optional[float] = None,
     category: str = "tube",
     model: Optional[str] = None,
+    bottom_type: Union[TubeBottomType, str] = TubeBottomType.UNKNOWN,
+    compute_volume_from_height: Optional[Callable[[float], float]] = None,
+    compute_height_from_volume: Optional[Callable[[float], float]] = None,
   ):
+    if isinstance(bottom_type, str):
+      bottom_type = TubeBottomType(bottom_type)
     """Create a new tube.
 
     Args:
@@ -43,7 +56,11 @@ class Tube(Container):
       category=category,
       max_volume=max_volume,
       model=model,
+      compute_volume_from_height=compute_volume_from_height,
+      compute_height_from_volume=compute_height_from_volume,
     )
+    self.bottom_type = bottom_type
+
     self.tracker.register_callback(self._state_updated)
 
   def serialize(self) -> dict:

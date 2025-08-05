@@ -54,52 +54,60 @@ def _compute_height_from_volume_Eppendorf_1_5mL_Vb(V: float) -> float:
 
 
 def _compute_volume_from_height_Eppendorf_5mL_Vb(h: float) -> float:
-    R =  16.5/2.
-    Hk = 25.
-    Hc = 28.
+    a, b, c, d, e = -2.114710e-03, 1.464585e-01, -3.978945e-01, 1.622262e+01, 1.447176e+01
+    V = a * h**4 + b * h**3 + c * h**2 + d * h + e
+    return round(V,3)
+    # R =  16.5/2.
+    # Hk = 25.
+    # Hc = 28.
 
-    total_height = Hk + Hc
-    if not (0 <= h <= total_height):
-        raise ValueError(f"Height must be between 0 and {total_height}")
+    # total_height = Hk + Hc
+    # if not (0 <= h <= total_height):
+    #     raise ValueError(f"Height must be between 0 and {total_height}")
 
-    # Case 1: Liquid is in the conical part (0 <= h <= Hk)
-    if h <= Hk:
-        volume = (math.pi * R**2 * h**3) / (3 * Hk**2)
-        print(f"input height < cone height: volume={volume}")
-        return round(volume,3)
+    # # Case 1: Liquid is in the conical part (0 <= h <= Hk)
+    # if h <= Hk:
+    #     volume = (math.pi * R**2 * h**3) / (3 * Hk**2)
+    #     print(f"input height < cone height: volume={volume}")
+    #     return round(volume,3)
 
-    # Case 2: Liquid is in the cylindrical part (h > Hk)
-    else:
-        volume_cone = (1/3) * math.pi * R**2 * Hk
-        volume_in_cylinder = math.pi * R**2 * (h - Hk)
-        print(f"input height > cone height: height={volume_cone+volume_in_cylinder}")
-        return round(volume_cone + volume_in_cylinder,3)
+    # # Case 2: Liquid is in the cylindrical part (h > Hk)
+    # else:
+    #     volume_cone = (1/3) * math.pi * R**2 * Hk
+    #     volume_in_cylinder = math.pi * R**2 * (h - Hk)
+    #     print(f"input height > cone height: height={volume_cone+volume_in_cylinder}")
+    #     return round(volume_cone + volume_in_cylinder,3)
 
 def _compute_height_from_volume_Eppendorf_5mL_Vb(V: float) -> float:
-    R =  16.5/2.
-    Hk = 25.
-    Hc = 28.
+    a, b, c, d, e, f = 1.909598e-01, -2.558894e+00, 1.293383e+01, -3.054189e+01, 4.003277e+01, 4.039098e-01
+    V /= 1000.
+    height = a * V**5 + b * V**4 + c * V**3 + d * V**2 + e * V + f
+    return round(height,3)
 
-    volume_cone = (1/3) * math.pi * R**2 * Hk
-    volume_cylinder = math.pi * R**2 * Hc
-    total_volume = volume_cone + volume_cylinder
+    # R =  16.5/2.
+    # Hk = 25.
+    # Hc = 28.
 
-    if not (0 <= V <= total_volume):
-        raise ValueError(f"Volume must be between 0 and {total_volume:.2f}")
+    # volume_cone = (1/3) * math.pi * R**2 * Hk
+    # volume_cylinder = math.pi * R**2 * Hc
+    # total_volume = volume_cone + volume_cylinder
 
-    # Case 1: Liquid is in the conical part (V <= Vk)
-    if V <= volume_cone:
-        # Using the rearranged formula h = Hk * (V / Vk)^(1/3) for stability
-        height = Hk * (V / volume_cone)**(1/3)
-        print(f"input volume < cone: height={height}")
-        return round(height,3)
+    # if not (0 <= V <= total_volume):
+    #     raise ValueError(f"Volume must be between 0 and {total_volume:.2f}")
 
-    # Case 2: Liquid is in the cylindrical part (V > Vk)
-    else:
-        volume_in_cylinder = V - volume_cone
-        height_in_cylinder = volume_in_cylinder / (math.pi * R**2)
-        print(f"input volume > cone: height={Hk + height_in_cylinder}")
-        return round(Hk + height_in_cylinder,3)
+    # # Case 1: Liquid is in the conical part (V <= Vk)
+    # if V <= volume_cone:
+    #     # Using the rearranged formula h = Hk * (V / Vk)^(1/3) for stability
+    #     height = Hk * (V / volume_cone)**(1/3)
+    #     print(f"input volume < cone: height={height}")
+    #     return round(height,3)
+
+    # # Case 2: Liquid is in the cylindrical part (V > Vk)
+    # else:
+    #     volume_in_cylinder = V - volume_cone
+    #     height_in_cylinder = volume_in_cylinder / (math.pi * R**2)
+    #     print(f"input volume > cone: height={Hk + height_in_cylinder}")
+    #     return round(Hk + height_in_cylinder,3)
 
 
 

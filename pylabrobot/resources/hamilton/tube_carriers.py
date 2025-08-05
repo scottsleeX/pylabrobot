@@ -20,7 +20,7 @@ def Tube_CAR_24_A00(name: str) -> TubeCarrier:
     sites=create_homogeneous_resources(
       klass=ResourceHolder,
       locations=[
-        Coordinate(5.0, 10.0 + x * 20, 10.0 + 1.2) for x in range(24)
+        Coordinate(3.0, 9.0 + x * 20, 10.0 + 1.2) for x in range(24)
       ],  # TODO: +1.2 to account for the Tube.material_z_thickness, fix container
       resource_size_x=18.0,
       resource_size_y=18.0,

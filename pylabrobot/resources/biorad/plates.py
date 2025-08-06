@@ -12,7 +12,7 @@ def BioRad_384_wellplate_50uL_Vb(name: str) -> Plate:
     name=name,
     size_x=127.76,
     size_y=85.48,
-    size_z=10.40,
+    size_z=11.,
     lid=None,
     model="BioRad_384_wellplate_50uL_Vb",
     ordered_items=create_ordered_items_2d(

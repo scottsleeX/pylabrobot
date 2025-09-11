@@ -32,3 +32,58 @@ def BioRad_384_wellplate_50uL_Vb(name: str) -> Plate:
       cross_section_type=CrossSectionType.CIRCLE,
     ),
   )
+
+
+def Primer_384_wellplate_120uL_Fb(name: str) -> Plate:
+  return Plate(
+    name=name,
+    size_x=127.76,
+    size_y=85.48,
+    size_z=11.,
+    lid=None,
+    model="Primer_384_wellplate_120uL_Fb",
+    ordered_items=create_ordered_items_2d(
+      Well,
+      num_items_x=24,
+      num_items_y=16,
+      dx=10.08,
+      dy=7.44,
+      dz=1.05,
+      item_dx=4.5,
+      item_dy=4.5,
+      size_x=3.7,
+      size_y=3.7,
+      size_z=15.,
+      bottom_type=WellBottomType.FLAT,
+      material_z_thickness=1,  # measured
+      cross_section_type=CrossSectionType.RECTANGLE,
+    ),
+  )
+
+
+
+def Primer_384_wellplate_200uL_Fb(name: str) -> Plate:
+  return Plate(
+    name=name,
+    size_x=127.76,
+    size_y=85.48,
+    size_z=19.5,
+    lid=None,
+    model="Primer_384_wellplate_200uL_Fb",
+    ordered_items=create_ordered_items_2d(
+      Well,
+      num_items_x=24,
+      num_items_y=16,
+      dx=8.4,
+      dy=7.44,
+      dz=1.05,
+      item_dx=4.5,
+      item_dy=4.5,
+      size_x=3.7,
+      size_y=3.7,
+      size_z=15.,
+      bottom_type=WellBottomType.FLAT,
+      material_z_thickness=2,  # measured
+      cross_section_type=CrossSectionType.RECTANGLE,
+    ),
+  )

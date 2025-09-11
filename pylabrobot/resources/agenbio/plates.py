@@ -140,7 +140,7 @@ def AGenBio_1_troughplate_190000uL_Fl(name: str, lid: Optional[Lid] = None) -> P
       INNER_WELL_HEIGHT,
       INNER_WELL_WIDTH,
     ),
-    "material_z_thickness": 4.5,
+    "material_z_thickness": 5.5,
   }
 
   return Plate(

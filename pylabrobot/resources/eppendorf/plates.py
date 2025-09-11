@@ -78,13 +78,13 @@ def Eppendorf_96_wellplate_250ul_Vb(name: str, with_lid: bool = False) -> Plate:
     size_z=20.3,
     lid=Eppendorf_96_wellplate_250ul_Vb_Lid(name + "_lid") if with_lid else None,
     model="Eppendorf_96_wellplate_250ul_Vb",
-    plate_type="non-skirted",
+    plate_type="skirted",
     ordered_items=create_ordered_items_2d(
       Well,
       num_items_x=12,
       num_items_y=8,
-      dx=6.76,
-      dy=8.26,
+      dx=11.0,
+      dy=8.0,
       dz=0.0,  # check that plate is non-skirted
       item_dx=9,
       item_dy=9,

@@ -394,7 +394,7 @@ class HamiltonSTARDeck(HamiltonDeck):
 
       self.assign_child_resource(
         resource=Trash("trash", size_x=0, size_y=241.2, size_z=0),
-        location=Coordinate(x=trash_x, y=190.6, z=137.1),
+        location=Coordinate(x=trash_x, y=190.6, z=150.1),
       )  # z I am not sure about
 
     self._trash96: Optional[Trash] = None
@@ -403,7 +403,7 @@ class HamiltonSTARDeck(HamiltonDeck):
       self._trash96 = Trash("trash_core96", size_x=122.4, size_y=82.6, size_z=0)  # size of tiprack
       self.assign_child_resource(
         resource=self._trash96,
-        location=Coordinate(x=-42.0 - 16.2, y=120.3 - 14.3, z=229.0),
+        location=Coordinate(x=-42.0 - 16.2, y=120.3 - 14.3, z=245.0),
       )
 
     if with_teaching_rack:

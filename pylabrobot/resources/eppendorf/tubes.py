@@ -145,7 +145,7 @@ def Eppendorf_1_5ml_Vb(name: str) -> Tube:
   - bottom_type=TubeBottomType.V
   - snap-cap lid
   """
-  material_z_thickness = 1.
+  material_z_thickness = 3.5
   diameter = 10.6
   return Tube(
     name=name,

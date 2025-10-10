@@ -15,6 +15,7 @@ class Liquid(enum.Enum):
   GLYCERIN = "Glycerin"
   GLYCERIN80 = "Glycerin 80%"  # TODO: need a better way to represent this.
   DMSO = "DMSO"
+  MM = "MM"
   PLASMA = "Plasma 100%"
   SERUM = "Serum 100%"
   ACETONITRILE = "Acetonitrile 100%"
@@ -54,5 +55,7 @@ class Liquid(enum.Enum):
       s = "Plasma 100%"
     elif s == "DMSO":
       s = "DMSO"
+    elif s == "MM":
+      s = "MM"
 
     return Liquid(s)

@@ -167,7 +167,7 @@ async def main():
     # Operations for DestinationPlate_group_1
 
     # Step 1: Transfer Nuclease-Free Water
-    await lh.pick_up_tips(["STF"])
+    await lh.pick_up_tips(["STF","STF"])
     # await lh.pick_up_tips(tips_50ul_1["A1:C1"])
     time.sleep(0.2)
     await lh.aspirate(dmso_tube["A1"],vols=[1,2])

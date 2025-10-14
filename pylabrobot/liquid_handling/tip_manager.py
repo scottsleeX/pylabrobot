@@ -36,7 +36,7 @@ class TipManager:
       # Group tip spots by tip type. Assumes tip type is from tip name.
       for spot in rack.get_all_items():
         if spot.has_tip():
-          tip_type = spot.get_tip().name
+          tip_type = spot.get_tip().__class__.__name__
           if tip_type not in self._tip_spot_lists:
             self._tip_spot_lists[tip_type] = []
           self._tip_spot_lists[tip_type].append(spot)

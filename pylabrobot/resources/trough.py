@@ -2,18 +2,18 @@ import enum
 from typing import Callable, Optional, Union, List, Tuple
 
 from .container import Container
+from .well_container import WellContainer
 
 
 class TroughBottomType(enum.Enum):
   """Enum for the type of bottom of a trough."""
-
   FLAT = "flat"
   U = "U"
   V = "V"
   UNKNOWN = "unknown"
 
 
-class Trough(Container):
+class Trough(WellContainer, Container):
   """A trough is a container, particularly useful for multichannel liquid handling operations."""
 
   def __init__(

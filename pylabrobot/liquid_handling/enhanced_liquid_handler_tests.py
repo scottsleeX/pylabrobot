@@ -47,7 +47,7 @@ async def main():
     print("Setting up Liquid Handler...")
     backend = STARBackend()
     deck = STARDeck()
-    lh = TipManager(backend=LiquidHandlerChatterboxBackend(), deck=deck)
+    lh = EnhancedLiquidHandler(backend=LiquidHandlerChatterboxBackend(), deck=deck)
     await lh.setup()
     print("Liquid Handler setup complete.")
 

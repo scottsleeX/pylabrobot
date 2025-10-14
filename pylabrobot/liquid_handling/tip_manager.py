@@ -1,9 +1,17 @@
+from __future__ import annotations
+
+import logging
+from typing import List, TYPE_CHECKING
+
+from pylabrobot.liquid_handling.errors import ChannelizedError
+from pylabrobot.resources import Deck, TipRack, TipSpot
 from pylabrobot.liquid_handling.liquid_handler import LiquidHandler
 from pylabrobot.liquid_handling.backends.backend import LiquidHandlerBackend
 
 
 if TYPE_CHECKING:
   from pylabrobot.liquid_handling.liquid_handler import LiquidHandler
+
 
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ import logging
 from typing import List, TYPE_CHECKING
 
 from pylabrobot.liquid_handling.errors import ChannelizedError
-from pylabrobot.resources import TipRack, TipSpot
+from pylabrobot.resources import Deck, TipRack, TipSpot
 
 if TYPE_CHECKING:
   from pylabrobot.liquid_handling.liquid_handler import LiquidHandler
@@ -14,15 +14,25 @@ logger = logging.getLogger(__name__)
 class TipManager:
   """ A class to manage tip boxes and tip pickup with retries. """
 
-  def __init__(self, tip_racks: list[TipRack]):
-    self.tip_racks = tip_racks
+  def __init__(self, deck: Deck):
+    self.deck = deck
     self._tip_spot_lists: dict[str, list[TipSpot]] = {}
     self.refresh()
 
   def refresh(self):
     """ Refresh the list of available tips from the tip racks. """
     self._tip_spot_lists.clear()
-    for rack in self.tip_racks:
+
+    # Find all tip racks on the deck by traversing the resource tree.
+    tip_racks = []
+    resources_to_visit = [self.deck]
+    while resources_to_visit:
+      resource = resources_to_visit.pop(0)
+      if isinstance(resource, TipRack):
+        tip_racks.append(resource)
+      resources_to_visit.extend(resource.children)
+
+    for rack in tip_racks:
       # Group tip spots by tip type. Assumes tip type is from tip name.
       for spot in rack.get_all_items():
         if spot.has_tip():

@@ -1,21 +1,19 @@
-from __future__ import annotations
+from pylabrobot.liquid_handling.liquid_handler import LiquidHandler
+from pylabrobot.liquid_handling.backends.backend import LiquidHandlerBackend
 
-import logging
-from typing import List, TYPE_CHECKING
-
-from pylabrobot.liquid_handling.errors import ChannelizedError
-from pylabrobot.resources import Deck, TipRack, TipSpot
 
 if TYPE_CHECKING:
   from pylabrobot.liquid_handling.liquid_handler import LiquidHandler
 
+
 logger = logging.getLogger(__name__)
 
-class TipManager:
+
+class TipManager(LiquidHandler):
   """ A class to manage tip boxes and tip pickup with retries. """
 
-  def __init__(self, deck: Deck):
-    self.deck = deck
+  def __init__(self, backend: LiquidHandlerBackend, deck: Deck):
+    super().__init__(backend=backend, deck=deck)
     self._tip_spot_lists: dict[str, list[TipSpot]] = {}
     self.refresh()
 
@@ -41,20 +39,18 @@ class TipManager:
             self._tip_spot_lists[tip_type] = []
           self._tip_spot_lists[tip_type].append(spot)
 
-  async def pick_up_tips(
+  async def pick_up_tips_by_type(
     self,
-    lh: LiquidHandler,
     tip_types: list[str],
     **kwargs,
   ):
     """ Pick up tips of specified types, with retries on failure.
 
     Args:
-      lh: The LiquidHandler instance.
       tip_types: A list of tip types to pick up. The length of the list determines how many
         tips to pick up and which channels to use. For example: `["STF", "STF"]` will pick up
         two STF tips using the first two available channels.
-      **kwargs: Additional keyword arguments to pass to `lh.pick_up_tips`.
+      **kwargs: Additional keyword arguments to pass to `self.pick_up_tips`.
     """
     use_channels = kwargs.get("use_channels", list(range(len(tip_types))))
     if len(tip_types) != len(use_channels):
@@ -90,10 +86,10 @@ class TipManager:
           for i in range(len(spots) - num_tips + 1):
             spots_to_try = spots[i:i+num_tips]
             try:
-              await lh.pick_up_tips(spots_to_try, use_channels=use_channels, **kwargs)
+              await self.pick_up_tips(spots_to_try, use_channels=use_channels, **kwargs)
               self.refresh()
               return # Success
-            except ChannelizedError as e:
+            except ChannelageError as e:
               for channel in e.errors:
                 spot_to_clear = spots_to_try[use_channels.index(channel)]
                 spot_to_clear.set_tip(None)
@@ -117,7 +113,7 @@ class TipManager:
       spots_to_try = list(attempted_spots.values())
 
       try:
-        await lh.pick_up_tips(spots_to_try, use_channels=channels_to_try, **kwargs)
+        await self.pick_up_tips(spots_to_try, use_channels=channels_to_try, **kwargs)
         break # Success
       except ChannelizedError as e:
         logger.info("Failed to pick up tips on channels %s. Retrying with new tips.", e.errors)

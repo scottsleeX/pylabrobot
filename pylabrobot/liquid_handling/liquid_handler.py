@@ -809,11 +809,13 @@ class LiquidHandler(Resource, Machine):
       backend_kwargs: Additional keyword arguments for the backend, optional.
 
     Raises:
-      RuntimeError: If the setup has not been run. See :meth:`~LiquidHandler.setup`.
+      RuntimeError: If the setup has not been run. See :meth:`~Liquid_Handler.setup`.
 
       ValueError: If all channels are `None`.
     """
 
+    if not isinstance(resources, Sequence) or isinstance(resources, str):
+      resources = [resources]
     self._check_containers(resources)
 
     use_channels_was_provided = use_channels is not None
@@ -843,6 +845,21 @@ class LiquidHandler(Resource, Machine):
       elif len(vols) != num_ops:
         raise ValueError(f"The length of `vols` ({len(vols)}) must be 1 or equal to the "
                          f"inferred number of operations ({num_ops}).")
+
+    # If a single tube is used for multiple channels, aspirate serially.
+    if len(resources) == 1 and isinstance(resources[0], Tube) and len(use_channels) > 1:
+      for i, channel in enumerate(use_channels):
+        await self.aspirate(
+          resources=resources,
+          vols=[vols[i]],
+          use_channels=[channel],
+          flow_rates=[flow_rates[i]] if flow_rates else None,
+          offsets=[offsets[i]] if offsets else None,
+          liquid_height=[liquid_height[i]] if liquid_height else None,
+          blow_out_air_volume=[blow_out_air_volume[i]] if blow_out_air_volume else None,
+          **backend_kwargs,
+        )
+      return
 
     resources = adjust_resources_for_pipetting(resources, len(use_channels))
 
@@ -1055,6 +1072,8 @@ class LiquidHandler(Resource, Machine):
     # want to space the channels evenly across the resource. Note that offsets are relative to the
     # center of the resource.
 
+    if not isinstance(resources, Sequence) or isinstance(resources, str):
+      resources = [resources]
     self._check_containers(resources)
 
     use_channels_was_provided = use_channels is not None

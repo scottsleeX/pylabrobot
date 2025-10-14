@@ -29,37 +29,50 @@ class TipManager(LiquidHandler):
     """ Refresh the list of available tips from the tip racks. """
     self._tip_spot_lists.clear()
 
-    # Find all tip racks on the deck by traversing the resource tree.
     tip_racks = []
-    resources_to_visit = [self.deck]
-    while resources_to_visit:
-      resource = resources_to_visit.pop(0)
-      if isinstance(resource, TipRack):
+
+    # Find tip racks by iterating through carriers on the deck. This is more reliable than
+    # the generic .children traversal, which does not seem to work for carriers.
+    for resource in self.deck.children:
+      # Heuristic: a carrier has a 'sites' attribute.
+      if hasattr(resource, "sites"):
+        for i in range(len(resource.sites)):
+          holder = resource[i]
+          item = holder.resource
+          if isinstance(item, TipRack):
+            tip_racks.append(item)
+
+      # Also consider the case where a TipRack is a direct child of the deck.
+      elif isinstance(resource, TipRack):
         tip_racks.append(resource)
-      resources_to_visit.extend(resource.children)
 
     for rack in tip_racks:
-      # Group tip spots by the class name of the tip rack.
-      rack_type = rack.__class__.__name__
+      # Group tip spots by the model name of the tip rack.
+      rack_type = rack.model
+      if rack_type is None:
+        continue
       if rack_type not in self._tip_spot_lists:
         self._tip_spot_lists[rack_type] = []
       for spot in rack.get_all_items():
         if spot.has_tip():
           self._tip_spot_lists[rack_type].append(spot)
 
-  async def pick_up_tips_by_type(
+  async def pick_up_tips(
     self,
     tip_types: list[str],
     **kwargs,
   ):
-    """ Pick up tips from specified rack types, with retries on failure.
+    """ Pick up tips from specified rack models, with retries on failure.
 
     Args:
-      tip_types: A list of tip rack types (as strings) to pick up tips from. The length of the
+      tip_types: A list of tip rack models (as strings) to pick up tips from. The length of the
         list determines how many tips to pick up and which channels to use. For example:
         `["HTF", "HTF"]` will pick up two tips from the first available `HTF` racks.
       **kwargs: Additional keyword arguments to pass to `self.pick_up_tips`.
     """
+    if isinstance(tip_types, str):
+      tip_types = [tip_types]
+
     use_channels = kwargs.get("use_channels", list(range(len(tip_types))))
     if len(tip_types) != len(use_channels):
       raise ValueError("Length of tip_types must match length of use_channels.")
@@ -68,7 +81,6 @@ class TipManager(LiquidHandler):
     candidate_tips = {
         tip_type: list(spots) for tip_type, spots in self._tip_spot_lists.items()
     }
-    print(candidate_tips)
 
     # Map channels to the tip type they need to pick up.
     channel_tip_type_map = dict(zip(use_channels, tip_types))
@@ -80,7 +92,7 @@ class TipManager(LiquidHandler):
 
       # Group spots by rack and column.
       columns = {}
-      for spot in self._tip_spot_lists.get(tip_type, []):
+      for spot in candidate_tips.get(tip_type, []):
         rack = spot.parent
         # Tip spots are named e.g. "A1", "B1", etc. The column is the number.
         col_id = int("".join(filter(str.isdigit, spot.name)))
@@ -95,14 +107,16 @@ class TipManager(LiquidHandler):
           for i in range(len(spots) - num_tips + 1):
             spots_to_try = spots[i:i+num_tips]
             try:
-              await self.pick_up_tips(spots_to_try, use_channels=use_channels, **kwargs)
+              await super().pick_up_tips(spots_to_try, use_channels=use_channels, **kwargs)
               self.refresh()
               return # Success
-            except ChannelageError as e:
+            except ChannelizedError as e:
               for channel in e.errors:
                 spot_to_clear = spots_to_try[use_channels.index(channel)]
                 spot_to_clear.set_tip(None)
-              continue # Try next set of tips in the column.
+                if tip_type in candidate_tips and spot_to_clear in candidate_tips[tip_type]:
+                  candidate_tips[tip_type].remove(spot_to_clear)
+              break # Try next column.
             except Exception:
               logger.error("An unexpected error occurred during tip pickup.")
               raise
@@ -122,7 +136,7 @@ class TipManager(LiquidHandler):
       spots_to_try = list(attempted_spots.values())
 
       try:
-        await self.pick_up_tips(spots_to_try, use_channels=channels_to_try, **kwargs)
+        await super().pick_up_tips(spots_to_try, use_channels=channels_to_try, **kwargs)
         break # Success
       except ChannelizedError as e:
         logger.info("Failed to pick up tips on channels %s. Retrying with new tips.", e.errors)

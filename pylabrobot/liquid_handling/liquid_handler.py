@@ -30,6 +30,7 @@ from pylabrobot.liquid_handling.strictness import (
   Strictness,
   get_strictness,
 )
+from pylabrobot.liquid_handling.resources import adjust_resources_for_pipetting
 from pylabrobot.liquid_handling.utils import (
   get_tight_single_resource_liquid_op_offsets,
   get_wide_single_resource_liquid_op_offsets,
@@ -52,6 +53,7 @@ from pylabrobot.resources import (
   TipSpot,
   TipTracker,
   Trash,
+  Tube,
   VolumeTracker,
   Well,
   does_cross_contamination_tracking,
@@ -828,6 +830,23 @@ class LiquidHandler(Resource, Machine):
     use_channels = use_channels or self._default_use_channels or list(range(len(resources)))
     assert len(set(use_channels)) == len(use_channels), "Channels must be unique."
 
+    # If a single tube is used for multiple channels, aspirate serially.
+    if len(resources) == 1 and isinstance(resources[0], Tube) and len(use_channels) > 1:
+      for i, channel in enumerate(use_channels):
+        await self.aspirate(
+          resources=resources,
+          vols=[vols[i]],
+          use_channels=[channel],
+          flow_rates=[flow_rates[i]] if flow_rates else None,
+          offsets=[offsets[i]] if offsets else None,
+          liquid_height=[liquid_height[i]] if liquid_height else None,
+          blow_out_air_volume=[blow_out_air_volume[i]] if blow_out_air_volume else None,
+          **backend_kwargs,
+        )
+      return
+
+    resources = adjust_resources_for_pipetting(resources, len(use_channels))
+
     # expand default arguments
     offsets = offsets or [Coordinate.zero()] * len(use_channels)
     flow_rates = flow_rates or [None] * len(use_channels)
@@ -1041,6 +1060,23 @@ class LiquidHandler(Resource, Machine):
 
     use_channels = use_channels or self._default_use_channels or list(range(len(resources)))
     assert len(set(use_channels)) == len(use_channels), "Channels must be unique."
+
+    # If a single tube is used for multiple channels, dispense serially.
+    if len(resources) == 1 and isinstance(resources[0], Tube) and len(use_channels) > 1:
+      for i, channel in enumerate(use_channels):
+        await self.dispense(
+          resources=resources,
+          vols=[vols[i]],
+          use_channels=[channel],
+          flow_rates=[flow_rates[i]] if flow_rates else None,
+          offsets=[offsets[i]] if offsets else None,
+          liquid_height=[liquid_height[i]] if liquid_height else None,
+          blow_out_air_volume=[blow_out_air_volume[i]] if blow_out_air_volume else None,
+          **backend_kwargs,
+        )
+      return
+
+    resources = adjust_resources_for_pipetting(resources, len(use_channels))
 
     # expand default arguments
     offsets = offsets or [Coordinate.zero()] * len(use_channels)

@@ -12,3 +12,4 @@ from .standard import (
   SingleChannelDispense,
 )
 from .strictness import Strictness, get_strictness, set_strictness
+from .tip_manager import TipManager

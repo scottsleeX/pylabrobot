@@ -64,12 +64,20 @@ class TipManager(LiquidHandler):
   ):
     """ Pick up tips from specified rack models, with retries on failure.
 
+    This method can handle two types of input for `tip_types`:
+    1. A list of strings, where each string is a tip rack model name (e.g., `["HTF", "STF"]`).
+       The manager will find available tips of these types.
+    2. A list of `TipSpot` objects, which will be passed directly to the liquid handler.
+
     Args:
-      tip_types: A list of tip rack models (as strings) to pick up tips from. The length of the
-        list determines how many tips to pick up and which channels to use. For example:
-        `["HTF", "HTF"]` will pick up two tips from the first available `HTF` racks.
+      tip_types: A list of tip rack models (as strings) or a list of `TipSpot` objects.
       **kwargs: Additional keyword arguments to pass to `self.pick_up_tips`.
     """
+    # If tip_types is a list of TipSpots, use the parent's implementation.
+    if tip_types and isinstance(tip_types[0], TipSpot):
+      await super().pick_up_tips(tip_types, **kwargs)
+      return
+
     if isinstance(tip_types, str):
       tip_types = [tip_types]
 

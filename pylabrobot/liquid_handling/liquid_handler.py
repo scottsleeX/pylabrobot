@@ -816,14 +816,23 @@ class LiquidHandler(Resource, Machine):
 
     self._check_containers(resources)
 
-    if len(resources) == 1 and len(vols) > 1:
-      num_channels = len(vols)
-    else:
-      num_channels = len(resources)
-    use_channels = use_channels or self._default_use_channels or list(range(num_channels))
+    # Determine the number of channels to use. If use_channels is specified, it's the authority.
+    if use_channels is None:
+      if self._default_use_channels is not None:
+        use_channels = self._default_use_channels
+      else:
+        if len(resources) == 1 and isinstance(vols, list) and len(vols) > 1:
+          num_ops = len(vols)
+        else:
+          num_ops = len(resources)
+        use_channels = list(range(num_ops))
+    num_ops = len(use_channels)
+
     assert len(set(use_channels)) == len(use_channels), "Channels must be unique."
 
-    # If a single tube is used for multiple channels, aspirate serially.
+    # Normalize vols to match the number of operations.
+    if len(vols) == 1 and num_ops > 1:
+      vols = [vols[0]] * num_ops
     if len(resources) == 1 and isinstance(resources[0], Tube) and len(use_channels) > 1:
       for i, channel in enumerate(use_channels):
         await self.aspirate(
@@ -1051,12 +1060,23 @@ class LiquidHandler(Resource, Machine):
 
     self._check_containers(resources)
 
-    if len(resources) == 1 and len(vols) > 1:
-      num_channels = len(vols)
-    else:
-      num_channels = len(resources)
-    use_channels = use_channels or self._default_use_channels or list(range(num_channels))
+    # Determine the number of channels to use. If use_channels is specified, it's the authority.
+    if use_channels is None:
+      if self._default_use_channels is not None:
+        use_channels = self._default_use_channels
+      else:
+        if len(resources) == 1 and isinstance(vols, list) and len(vols) > 1:
+          num_ops = len(vols)
+        else:
+          num_ops = len(resources)
+        use_channels = list(range(num_ops))
+    num_ops = len(use_channels)
+
     assert len(set(use_channels)) == len(use_channels), "Channels must be unique."
+
+    # Normalize vols to match the number of operations.
+    if len(vols) == 1 and num_ops > 1:
+      vols = [vols[0]] * num_ops
 
     # If a single tube is used for multiple channels, dispense serially.
     if len(resources) == 1 and isinstance(resources[0], Tube) and len(use_channels) > 1:

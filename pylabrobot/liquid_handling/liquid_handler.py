@@ -814,20 +814,13 @@ class LiquidHandler(Resource, Machine):
       ValueError: If all channels are `None`.
     """
 
-    self._log_command(
-      "aspirate",
-      resources=resources,
-      vols=vols,
-      use_channels=use_channels,
-      flow_rates=flow_rates,
-      offsets=offsets,
-      liquid_height=liquid_height,
-      blow_out_air_volume=blow_out_air_volume,
-    )
-
     self._check_containers(resources)
 
-    use_channels = use_channels or self._default_use_channels or list(range(len(resources)))
+    if len(resources) == 1 and len(vols) > 1:
+      num_channels = len(vols)
+    else:
+      num_channels = len(resources)
+    use_channels = use_channels or self._default_use_channels or list(range(num_channels))
     assert len(set(use_channels)) == len(use_channels), "Channels must be unique."
 
     # If a single tube is used for multiple channels, aspirate serially.
@@ -1058,7 +1051,11 @@ class LiquidHandler(Resource, Machine):
 
     self._check_containers(resources)
 
-    use_channels = use_channels or self._default_use_channels or list(range(len(resources)))
+    if len(resources) == 1 and len(vols) > 1:
+      num_channels = len(vols)
+    else:
+      num_channels = len(resources)
+    use_channels = use_channels or self._default_use_channels or list(range(num_channels))
     assert len(set(use_channels)) == len(use_channels), "Channels must be unique."
 
     # If a single tube is used for multiple channels, dispense serially.

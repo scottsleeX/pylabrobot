@@ -6,14 +6,18 @@ from pylabrobot.liquid_handling.tip_manager import TipManager
 from pylabrobot.liquid_handling.backends.testing import NoTipErrorBackend
 from pylabrobot.resources import Deck, STF_L, TipRack, TipSpot, Tip
 
+# A custom tip rack class for testing.
+class HTF(TipRack):
+  pass
+
 class TestTipManager(unittest.IsolatedAsyncioTestCase):
   """ Tests for the TipManager class. """
 
   def setUp(self):
     self.backend = NoTipErrorBackend()
     self.deck = Deck()
-    self.tip_rack1 = TipRack("tip_rack1", "A1", "B1", num_items=8)
-    self.tip_rack2 = TipRack("tip_rack2", "A1", "B1", num_items=8)
+    self.tip_rack1 = HTF("tip_rack1", "A1", "B1", num_items=8)
+    self.tip_rack2 = HTF("tip_rack2", "A1", "B1", num_items=8)
     self.deck.assign_child_resource(self.tip_rack1, location=(0, 0, 0))
     self.deck.assign_child_resource(self.tip_rack2, location=(100, 0, 0))
 
@@ -27,7 +31,7 @@ class TestTipManager(unittest.IsolatedAsyncioTestCase):
     """ Test that pick_up_tips works in the ideal case. """
     tm = TipManager(backend=self.backend, deck=self.deck)
     tm.pick_up_tips = AsyncMock()
-    await tm.pick_up_tips_by_type(["Tip", "Tip"])
+    await tm.pick_up_tips_by_type(["HTF", "HTF"])
     tm.pick_up_tips.assert_called_once_with(
       [self.tip_rack1.get_item(0), self.tip_rack1.get_item(1)],
       use_channels=[0, 1]
@@ -41,7 +45,7 @@ class TestTipManager(unittest.IsolatedAsyncioTestCase):
         self.tip_rack1.get_item(i).set_tip(None)
     tm = TipManager(backend=self.backend, deck=self.deck)
     tm.pick_up_tips = AsyncMock()
-    await tm.pick_up_tips_by_type(["Tip", "Tip", "Tip", "Tip"])
+    await tm.pick_up_tips_by_type(["HTF", "HTF", "HTF", "HTF"])
     # Should pick up from the second column of tip_rack1, which is full.
     tm.pick_up_tips.assert_called_once_with(
       self.tip_rack2.get_all_items()[0:4],
@@ -55,7 +59,7 @@ class TestTipManager(unittest.IsolatedAsyncioTestCase):
       ChannelizedError({0: Exception("Failed to pick up tip.")}),
       None
     ])
-    await tm.pick_up_tips_by_type(["Tip", "Tip"])
+    await tm.pick_up_tips_by_type(["HTF", "HTF"])
 
     self.assertEqual(tm.pick_up_tips.call_count, 2)
     tm.pick_up_tips.assert_has_calls([
@@ -68,7 +72,7 @@ class TestTipManager(unittest.IsolatedAsyncioTestCase):
     tm = TipManager(backend=self.backend, deck=self.deck)
     tm.pick_up_tips = AsyncMock(side_effect=ChannelizedError({0: Exception("Failed.")}))
     with self.assertRaises(RuntimeError):
-      await tm.pick_up_tips_by_type(["Tip"])
+      await tm.pick_up_tips_by_type(["HTF"])
 
   async def test_pick_up_tips_marks_failed_spot_empty(self):
     """ Test that a failed tip spot is marked as empty. """
@@ -77,7 +81,7 @@ class TestTipManager(unittest.IsolatedAsyncioTestCase):
       ChannelizedError({0: Exception("Failed to pick up tip.")}),
       None
     ])
-    await tm.pick_up_tips_by_type(["Tip"])
+    await tm.pick_up_tips_by_type(["HTF"])
     self.assertFalse(self.tip_rack1.get_item(0).has_tip())
 
 if __name__ == "__main__":

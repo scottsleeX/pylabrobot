@@ -39,25 +39,25 @@ class TipManager(LiquidHandler):
       resources_to_visit.extend(resource.children)
 
     for rack in tip_racks:
-      # Group tip spots by tip type. Assumes tip type is from tip name.
+      # Group tip spots by the class name of the tip rack.
+      rack_type = rack.__class__.__name__
+      if rack_type not in self._tip_spot_lists:
+        self._tip_spot_lists[rack_type] = []
       for spot in rack.get_all_items():
         if spot.has_tip():
-          tip_type = spot.get_tip().__class__.__name__
-          if tip_type not in self._tip_spot_lists:
-            self._tip_spot_lists[tip_type] = []
-          self._tip_spot_lists[tip_type].append(spot)
+          self._tip_spot_lists[rack_type].append(spot)
 
   async def pick_up_tips_by_type(
     self,
     tip_types: list[str],
     **kwargs,
   ):
-    """ Pick up tips of specified types, with retries on failure.
+    """ Pick up tips from specified rack types, with retries on failure.
 
     Args:
-      tip_types: A list of tip types to pick up. The length of the list determines how many
-        tips to pick up and which channels to use. For example: `["STF", "STF"]` will pick up
-        two STF tips using the first two available channels.
+      tip_types: A list of tip rack types (as strings) to pick up tips from. The length of the
+        list determines how many tips to pick up and which channels to use. For example:
+        `["HTF", "HTF"]` will pick up two tips from the first available `HTF` racks.
       **kwargs: Additional keyword arguments to pass to `self.pick_up_tips`.
     """
     use_channels = kwargs.get("use_channels", list(range(len(tip_types))))
@@ -68,6 +68,7 @@ class TipManager(LiquidHandler):
     candidate_tips = {
         tip_type: list(spots) for tip_type, spots in self._tip_spot_lists.items()
     }
+    print(candidate_tips)
 
     # Map channels to the tip type they need to pick up.
     channel_tip_type_map = dict(zip(use_channels, tip_types))

@@ -21,6 +21,7 @@ from pylabrobot.resources import (
 from pylabrobot.liquid_handling.resources import adjust_resources_for_pipetting
 from pylabrobot.machines.machine import need_setup_finished
 from pylabrobot.liquid_handling.errors import ChannelizedError
+from pylabrobot.liquid_handling.backends.hamilton import STARBackend
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +53,23 @@ class EnhancedLiquidHandler(LiquidHandler):
     self._tip_spot_lists: dict[str, list[TipSpot]] = {}
     self.default_aspiration_params = default_aspiration_params or {}
     self.default_dispense_params = default_dispense_params or {}
-    self.refresh()
+    # First refresh should not be async, as it's called in constructor
+    self._sync_refresh()
 
-  def refresh(self):
-    """ Refresh the list of available tips from the tip racks on the deck. """
+  def _sync_refresh(self):
+    """ Synchronous version of refresh for use in constructor. """
     self._tip_spot_lists.clear()
-    tip_racks = self.deck.get_resources(TipRack)
+    tip_racks = []
+    for resource in self.deck.children:
+      if hasattr(resource, "sites"):
+        for i in range(len(resource.sites)):
+          holder = resource[i]
+          item = holder.resource
+          if isinstance(item, TipRack):
+            tip_racks.append(item)
+      elif isinstance(resource, TipRack):
+        tip_racks.append(resource)
+
     for rack in tip_racks:
       rack_type = rack.model
       if rack_type is None:
@@ -67,6 +79,10 @@ class EnhancedLiquidHandler(LiquidHandler):
       for spot in rack.get_all_items():
         if spot.has_tip():
           self._tip_spot_lists[rack_type].append(spot)
+
+  async def refresh(self):
+    """ Asynchronously refresh the list of available tips from the tip racks on the deck. """
+    self._sync_refresh()
 
   async def pick_up_tips(
     self,
@@ -110,7 +126,7 @@ class EnhancedLiquidHandler(LiquidHandler):
             spots_to_try = spots[i:i+num_tips]
             try:
               await super().pick_up_tips(spots_to_try, use_channels=use_channels, **kwargs)
-              self.refresh()
+              await self.refresh()
               return
             except ChannelizedError as e:
               for channel in e.errors:
@@ -152,7 +168,14 @@ class EnhancedLiquidHandler(LiquidHandler):
       except Exception:
         logger.error("An unexpected error occurred during tip pickup.")
         raise
-    self.refresh()
+    await self.refresh()
+
+  def _is_compute_height_from_volume_implemented(self, resource: Container) -> bool:
+    try:
+        resource.compute_height_from_volume(0)
+        return True
+    except NotImplementedError:
+        return False
 
   @need_setup_finished
   async def aspirate(
@@ -195,7 +218,15 @@ class EnhancedLiquidHandler(LiquidHandler):
     merged_backend_kwargs = {**self.default_aspiration_params, **backend_kwargs}
 
     if liquid_height is None and does_volume_tracking():
-        liquid_height = [r.tracker.get_liquid_height() for r in resources]
+        liquid_height = [r.compute_height_from_volume(r.tracker.get_used_volume()) if self._is_compute_height_from_volume_implemented(r) else None for r in resources]
+
+    if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
+        immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
+        merged_backend_kwargs["immersion_depth"] = immersion_depths
+
+    if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
+        lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
+        merged_backend_kwargs["lld_mode"] = lld_modes
 
     if "surface_following_distance" not in merged_backend_kwargs and does_volume_tracking():
         resource_to_total_vol = {}
@@ -208,11 +239,11 @@ class EnhancedLiquidHandler(LiquidHandler):
         sfd_list = []
         can_compute_sfd = True
         for r in resources:
-            if not hasattr(r, "compute_height_from_volume"):
+            if not self._is_compute_height_from_volume_implemented(r):
                 can_compute_sfd = False
                 break
             r_id = id(r)
-            current_vol = r.tracker.get_volume()
+            current_vol = r.tracker.get_used_volume()
             total_aspirate_vol = resource_to_total_vol[r_id]["total_vol"]
             sfd = r.compute_height_from_volume(current_vol) - r.compute_height_from_volume(current_vol - total_aspirate_vol)
             sfd_list.append(sfd)
@@ -267,9 +298,17 @@ class EnhancedLiquidHandler(LiquidHandler):
     resources = adjust_resources_for_pipetting(resources, len(use_channels))
 
     if liquid_height is None and does_volume_tracking():
-        liquid_height = [r.tracker.get_liquid_height() for r in resources]
+        liquid_height = [r.compute_height_from_volume(r.tracker.get_used_volume()) if self._is_compute_height_from_volume_implemented(r) else None for r in resources]
 
     merged_backend_kwargs = {**self.default_dispense_params, **backend_kwargs}
+
+    if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
+        immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
+        merged_backend_kwargs["immersion_depth"] = immersion_depths
+
+    if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
+        lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
+        merged_backend_kwargs["lld_mode"] = lld_modes
 
     await super().dispense(
         resources=resources,

@@ -21,7 +21,7 @@ from pylabrobot.resources import (
 from pylabrobot.liquid_handling.resources import adjust_resources_for_pipetting
 from pylabrobot.machines.machine import need_setup_finished
 from pylabrobot.liquid_handling.errors import ChannelizedError
-from pylabrobot.liquid_handling.backends.hamilton import STARBackend
+from pylabrobot.liquid_handling.backends import STARBackend
 
 logger = logging.getLogger(__name__)
 

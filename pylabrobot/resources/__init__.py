@@ -48,7 +48,6 @@ from .tip_tracker import (
 from .trash import Trash
 from .trough import Trough
 from .tube import Tube
-from .tube_rack import TubeRack
 from .utils import (
   create_equally_spaced_2d,
   create_equally_spaced_x,

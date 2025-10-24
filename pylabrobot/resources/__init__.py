@@ -47,7 +47,6 @@ from .tip_tracker import (
 )
 from .trash import Trash
 from .trough import Trough
-from .trough_rack import TroughRack
 from .tube import Tube
 from .tube_rack import TubeRack
 from .utils import (

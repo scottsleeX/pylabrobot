@@ -1,6 +1,7 @@
-from typing import List, Optional, Tuple, Callable, Union
+from typing import List, Optional, Tuple, Callable, Union, Sequence
 
 from pylabrobot.resources.container import Container
+from pylabrobot.resources.errors import ResourceNotFoundError
 from pylabrobot.resources.liquid import Liquid
 from pylabrobot.resources.well_container import WellContainer
 import enum
@@ -79,3 +80,64 @@ class Tube(WellContainer, Container):
     """
 
     self.tracker.set_liquids(liquids)
+
+  def get_tube(self, identifier: Union[str, int, Tuple[int, int]]) -> "Tube":
+    """Get the tube itself, if the identifier is valid for a single-item rack."""
+    if identifier in ("A1", 0, (0, 0)):
+      return self
+    raise ResourceNotFoundError(f"Tube {self.name} does not have an item with identifier '{identifier}'.")
+
+  def get_tubes(self, identifier: Union[str, Sequence[int]]) -> List["Tube"]:
+    """Get the tube itself as a list, if the identifier is valid for a single-item rack."""
+    if (isinstance(identifier, str) and identifier == "A1") or \
+       (isinstance(identifier, Sequence) and not isinstance(identifier, str) and len(identifier) == 1 and identifier[0] == 0):
+      return [self]
+    raise ResourceNotFoundError(f"Tube {self.name} does not have items with identifier '{identifier}'.")
+
+  def __getitem__(self, identifier: Union[str, int, Tuple[int, int]]) -> "Tube":
+    """Get the tube itself, if the identifier is valid for a single-item rack."""
+    return self.get_tube(identifier)
+
+
+  @property
+  def num_items(self) -> int:
+    return 1
+
+  def get_all_items(self) -> List["Tube"]:
+    return [self]
+
+  def set_well_liquids(
+    self,
+    liquids: Union[
+      List[List[Tuple[Optional["Liquid"], Union[int, float]]]],
+      List[Tuple[Optional["Liquid"], Union[int, float]]],
+      Tuple[Optional["Liquid"], Union[int, float]],
+    ],
+  ) -> None:
+    """Update the liquid in the volume tracker for the tube.
+
+    Behaves like :meth:`pylabrobot.resources.TubeRack.set_well_liquids` for a single tube.
+    """
+
+    if isinstance(liquids, tuple):
+      liquids = [liquids]
+    elif isinstance(liquids, list) and len(liquids) > 0 and isinstance(liquids[0], list):
+      if len(liquids) == 1 and len(liquids[0]) == 1:
+        liquids = liquids[0]
+      else:
+        raise ValueError("For a single tube, liquids must be a single item or a 1x1 list of lists.")
+
+    if len(liquids) != 1:
+      raise ValueError(
+        f"Number of liquids ({len(liquids)}) does not match number of tubes (1) in Tube '{self.name}'."
+      )
+
+    self.set_liquids(liquids)
+
+  def disable_volume_trackers(self) -> None:
+    """Disable volume tracking for this tube."""
+    self.tracker.disable()
+
+  def enable_volume_trackers(self) -> None:
+    """Enable volume tracking for this tube."""
+    self.tracker.enable()

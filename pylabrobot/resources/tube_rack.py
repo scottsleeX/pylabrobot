@@ -69,7 +69,7 @@ class TubeRack(ItemizedResource[Tube]):
 
     return super().get_items(identifier)
 
-  def set_tube_liquids(
+  def set_well_liquids(
     self,
     liquids: Union[
       List[List[Tuple[Optional["Liquid"], Union[int, float]]]],

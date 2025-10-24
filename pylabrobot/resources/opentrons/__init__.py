@@ -8,3 +8,4 @@ from .plate_adapters import *
 from .plates import *
 from .reservoirs import *
 from .tip_racks import *
+from .tube_racks import *

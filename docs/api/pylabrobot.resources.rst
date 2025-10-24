@@ -144,7 +144,6 @@ Opentrons
     opentrons.load
     opentrons.plates
     opentrons.tip_racks
-    opentrons.tube_racks
 
 
 Porvair

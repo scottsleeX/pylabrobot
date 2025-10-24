@@ -355,9 +355,6 @@ class EnhancedLiquidHandler(LiquidHandler):
     if not isinstance(vols, Sequence):
         vols = [vols]
 
-    if not (len(source_wells) == len(dest_wells) == len(vols)):
-        raise ValueError("Source wells, destination wells, and volumes must have the same length.")
-
     if use_channels is None:
       use_channels = list(range(len(vols)))
 
@@ -373,15 +370,15 @@ class EnhancedLiquidHandler(LiquidHandler):
         f"({len(use_channels)})."
       )
 
-    await self.pick_up_tips(tip_types=tips_to_pick_up, use_channels=use_channels)
+    await self.pick_up_tips(tip_types=tips_to_pick_up)
 
     # 2. Aspirate
     aspirate_kwargs = aspirate_kwargs or {}
-    await self.aspirate(resources=source_wells, vols=vols, use_channels=use_channels, **aspirate_kwargs)
+    await self.aspirate(resources=source_wells, vols=vols, **aspirate_kwargs)
 
     # 3. Dispense
     dispense_kwargs = dispense_kwargs or {}
-    await self.dispense(resources=dest_wells, vols=vols, use_channels=use_channels, **dispense_kwargs)
+    await self.dispense(resources=dest_wells, vols=vols, **dispense_kwargs)
 
     # 4. Drop tips
     trash = None
@@ -405,4 +402,4 @@ class EnhancedLiquidHandler(LiquidHandler):
       raise RuntimeError("No trash found on deck.")
 
     drop_tip_kwargs = drop_tip_kwargs or {}
-    await self.drop_tips(resources=[trash], use_channels=use_channels, **drop_tip_kwargs)
+    await self.discard_tips()

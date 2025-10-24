@@ -17,6 +17,7 @@ from pylabrobot.resources import (
     TipSpot,
     does_volume_tracking,
     Tube,
+    Trough,
 )
 from pylabrobot.liquid_handling.resources import adjust_resources_for_pipetting
 from pylabrobot.machines.machine import need_setup_finished
@@ -222,7 +223,7 @@ class EnhancedLiquidHandler(LiquidHandler):
         elif len(vols) != num_ops:
             raise ValueError(f"Length of `vols` ({len(vols)}) must be 1 or equal to inferred number of operations ({num_ops}).")
 
-    if len(resources) == 1 and isinstance(resources[0], Tube) and len(use_channels) > 1:
+    if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
         for i, channel in enumerate(use_channels):
             await self.aspirate(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
         return
@@ -304,7 +305,7 @@ class EnhancedLiquidHandler(LiquidHandler):
         elif len(vols) != num_ops:
             raise ValueError(f"Length of `vols` ({len(vols)}) must be 1 or equal to inferred number of operations ({num_ops}).")
 
-    if len(resources) == 1 and isinstance(resources[0], Tube) and len(use_channels) > 1:
+    if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
         for i, channel in enumerate(use_channels):
             await self.dispense(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
         return

@@ -81,6 +81,10 @@ class Tube(WellContainer, Container):
 
     self.tracker.set_liquids(liquids)
 
+  def get_well(self, identifier: Union[str, int, Tuple[int, int]]) -> "Tube":
+    """Get the tube itself. Alias for get_tube, for duck-typing compatibility with Plate."""
+    return self.get_tube(identifier)
+
   def get_tube(self, identifier: Union[str, int, Tuple[int, int]]) -> "Tube":
     """Get the tube itself, if the identifier is valid for a single-item rack."""
     if identifier in ("A1", 0, (0, 0)):

@@ -69,6 +69,10 @@ class Trough(WellContainer, Container):
 
     self.tracker.set_liquids(liquids)
 
+  def get_well(self, identifier: Union[str, int, Tuple[int, int]]) -> "Trough":
+    """Get the trough itself. Alias for get_trough, for duck-typing compatibility with Plate."""
+    return self.get_trough(identifier)
+
   def get_trough(self, identifier: Union[str, int, Tuple[int, int]]) -> "Trough":
     """Get the trough itself, if the identifier is valid for a single-item rack."""
     if identifier in ("A1", 0, (0, 0)):

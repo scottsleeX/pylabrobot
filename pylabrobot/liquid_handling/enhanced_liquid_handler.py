@@ -108,6 +108,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     default_use_channels = list(
         range(self.num_channels - 1, self.num_channels - 1 - num_tips, -1)
     )
+    default_use_channels.sort()
     use_channels = kwargs.get("use_channels", default_use_channels)
     if len(tip_types) != len(use_channels):
       raise ValueError("Length of tip_types must match length of use_channels.")

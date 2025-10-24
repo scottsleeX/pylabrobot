@@ -37,6 +37,7 @@ class EnhancedLiquidHandler(LiquidHandler):
       backend,
       deck,
       num_channels: int = 16,
+      simulation: bool = True,
       default_aspiration_params: Optional[Dict[str, Any]] = None,
       default_dispense_params: Optional[Dict[str, Any]] = None,
   ):
@@ -46,6 +47,7 @@ class EnhancedLiquidHandler(LiquidHandler):
       backend: The liquid handling backend to use.
       deck: The deck layout.
       num_channels: The number of channels in the liquid handler.
+      simulation: Whether the liquid handler is in simulation mode.
       default_aspiration_params: A dictionary of default parameters to pass to the backend's
         `aspirate` method. These will be used unless overridden in a specific `aspirate` call.
       default_dispense_params: A dictionary of default parameters to pass to the backend's
@@ -53,6 +55,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     """
     super().__init__(backend=backend, deck=deck)
     self.num_channels = num_channels
+    self.simulation = simulation
     self._tip_spot_lists: dict[str, list[TipSpot]] = {}
     self.default_aspiration_params = default_aspiration_params or {}
     self.default_dispense_params = default_dispense_params or {}
@@ -105,10 +108,13 @@ class EnhancedLiquidHandler(LiquidHandler):
       tip_types = [tip_types]
 
     num_tips = len(tip_types)
-    default_use_channels = list(
-        range(self.num_channels - 1, self.num_channels - 1 - num_tips, -1)
-    )
-    default_use_channels.sort()
+    if self.simulation:
+      default_use_channels = list(range(num_tips))
+    else:
+      default_use_channels = list(
+          range(self.num_channels - 1, self.num_channels - 1 - num_tips, -1)
+      )
+      default_use_channels.sort()
     use_channels = kwargs.get("use_channels", default_use_channels)
     if len(tip_types) != len(use_channels):
       raise ValueError("Length of tip_types must match length of use_channels.")

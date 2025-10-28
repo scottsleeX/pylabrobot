@@ -386,15 +386,19 @@ class EnhancedLiquidHandler(LiquidHandler):
           f"Length of tip_types ({len(tips_to_pick_up)}) must match number of channels "
           f"({len(use_channels)})."
         )
-
+      print(tips_to_pick_up)
       await self.pick_up_tips(tip_types=tips_to_pick_up)
 
     # 2. Aspirate
     aspirate_kwargs = aspirate_kwargs or {}
+    print(source_wells)
+    print(vols)
     await self.aspirate(resources=source_wells, vols=vols, **aspirate_kwargs)
 
     # 3. Dispense
     dispense_kwargs = dispense_kwargs or {}
+    print(dest_wells)
+    print(vols)
     await self.dispense(resources=dest_wells, vols=vols, **dispense_kwargs)
 
     # 4. Drop tips

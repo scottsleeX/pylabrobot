@@ -339,28 +339,29 @@ class EnhancedLiquidHandler(LiquidHandler):
     source_wells: Union[Sequence[Well], Well],
     dest_wells: Union[Sequence[Well], Well],
     vols: Union[Sequence[float], float],
-    tip_types: Union[str, List[str]],
+    tip_types: Optional[Union[str, List[str]]] = None,
     use_channels: Optional[List[int]] = None,
     aspirate_kwargs: Optional[dict] = None,
     dispense_kwargs: Optional[dict] = None,
-    drop_tip_kwargs: Optional[dict] = None,
+    drop_tips: bool = True,
   ):
     """ Transfer a chunk of liquids from source wells to destination wells.
     This method performs a complete transfer operation for a chunk of transfers, which includes:
-    1. Picking up tips.
+    1. Picking up tips (optional).
     2. Aspirating liquid from source wells.
     3. Dispensing liquid to destination wells.
-    4. Dropping tips in the trash.
+    4. Dropping tips in the trash (optional).
     Args:
       source_wells: A well or a list of wells to aspirate from.
       dest_wells: A well or a list of wells to dispense to.
       vols: A volume or a list of volumes to transfer.
       tip_types: The type of tip to use for the transfer. Can be a single string or a list of
-        strings. If a single string is provided, it will be used for all channels.
+        strings. If a single string is provided, it will be used for all channels. If None, no tips
+        will be picked up.
       use_channels: A list of channels to use for the transfer. If None, channels will be inferred.
       aspirate_kwargs: Keyword arguments to pass to the `aspirate` method.
       dispense_kwargs: Keyword arguments to pass to the `dispense` method.
-      drop_tip_kwargs: Keyword arguments to pass to the `drop_tips` method.
+      drop_tips: Whether to drop the tips after the transfer.
     """
 
     if not isinstance(source_wells, Sequence) or isinstance(source_wells, str):
@@ -374,47 +375,48 @@ class EnhancedLiquidHandler(LiquidHandler):
       use_channels = list(range(len(vols)))
 
     # 1. Pick up tips
-    if isinstance(tip_types, str):
-      tips_to_pick_up = [tip_types] * len(use_channels)
-    else:
-      tips_to_pick_up = tip_types
+    if tip_types is not None:
+      if isinstance(tip_types, str):
+        tips_to_pick_up = [tip_types] * len(use_channels)
+      else:
+        tips_to_pick_up = tip_types
 
-    if len(tips_to_pick_up) != len(use_channels):
-      raise ValueError(
-        f"Length of tip_types ({len(tips_to_pick_up)}) must match number of channels "
-        f"({len(use_channels)})."
-      )
+      if len(tips_to_pick_up) != len(use_channels):
+        raise ValueError(
+          f"Length of tip_types ({len(tips_to_pick_up)}) must match number of channels "
+          f"({len(use_channels)})."
+        )
 
-    await self.pick_up_tips(tip_types=tips_to_pick_up)
+      await self.pick_up_tips(tip_types=tips_to_pick_up, use_channels=use_channels)
 
     # 2. Aspirate
     aspirate_kwargs = aspirate_kwargs or {}
-    await self.aspirate(resources=source_wells, vols=vols, **aspirate_kwargs)
+    await self.aspirate(resources=source_wells, vols=vols, use_channels=use_channels, **aspirate_kwargs)
 
     # 3. Dispense
     dispense_kwargs = dispense_kwargs or {}
-    await self.dispense(resources=dest_wells, vols=vols, **dispense_kwargs)
+    await self.dispense(resources=dest_wells, vols=vols, use_channels=use_channels, **dispense_kwargs)
 
     # 4. Drop tips
-    trash = None
-    for resource in self.deck.children:
-      if isinstance(resource, Trash):
-        trash = resource
-        break
-    if trash is None:
-      # maybe it is in a holder
+    if drop_tips:
+      trash = None
       for resource in self.deck.children:
-        if hasattr(resource, "sites"):
-          for i in range(len(resource.sites)):
-            holder = resource[i]
-            item = holder.resource
-            if isinstance(item, Trash):
-              trash = item
-              break
-        if trash is not None:
+        if isinstance(resource, Trash):
+          trash = resource
           break
-    if trash is None:
-      raise RuntimeError("No trash found on deck.")
+      if trash is None:
+        # maybe it is in a holder
+        for resource in self.deck.children:
+          if hasattr(resource, "sites"):
+            for i in range(len(resource.sites)):
+              holder = resource[i]
+              item = holder.resource
+              if isinstance(item, Trash):
+                trash = item
+                break
+          if trash is not None:
+            break
+      if trash is None:
+        raise RuntimeError("No trash found on deck.")
 
-    drop_tip_kwargs = drop_tip_kwargs or {}
-    await self.discard_tips()
+      await self.discard_tips()

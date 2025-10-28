@@ -391,11 +391,11 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     # 2. Aspirate
     aspirate_kwargs = aspirate_kwargs or {}
-    await self.aspirate(resources=source_wells, vols=vols, use_channels=use_channels, **aspirate_kwargs)
+    await self.aspirate(resources=source_wells, vols=vols, **aspirate_kwargs)
 
     # 3. Dispense
     dispense_kwargs = dispense_kwargs or {}
-    await self.dispense(resources=dest_wells, vols=vols, use_channels=use_channels, **dispense_kwargs)
+    await self.dispense(resources=dest_wells, vols=vols, **dispense_kwargs)
 
     # 4. Drop tips
     if drop_tips:

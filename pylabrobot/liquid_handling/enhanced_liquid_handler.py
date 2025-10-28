@@ -387,7 +387,7 @@ class EnhancedLiquidHandler(LiquidHandler):
           f"({len(use_channels)})."
         )
 
-      await self.pick_up_tips(tip_types=tips_to_pick_up, use_channels=use_channels)
+      await self.pick_up_tips(tip_types=tips_to_pick_up)
 
     # 2. Aspirate
     aspirate_kwargs = aspirate_kwargs or {}

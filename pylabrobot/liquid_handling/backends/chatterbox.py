@@ -63,7 +63,6 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
   def num_channels(self) -> int:
     return self._num_channels
 
-<<<<<<< HEAD
   async def assigned_resource_callback(self, resource: Resource):
     if not self._activate:
       return
@@ -74,8 +73,6 @@ class LiquidHandlerChatterboxBackend(LiquidHandlerBackend):
       return
     print(f"Resource {name} was unassigned from the liquid handler.")
 
-=======
->>>>>>> upstream/main
   async def pick_up_tips(self, ops: List[Pickup], use_channels: List[int], **backend_kwargs):
     if not self._activate:
       return

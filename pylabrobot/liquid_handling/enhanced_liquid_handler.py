@@ -116,6 +116,7 @@ class EnhancedLiquidHandler(LiquidHandler):
           range(self.num_channels - 1, self.num_channels - 1 - num_tips, -1)
       )
       default_use_channels.sort()
+      
     use_channels = kwargs.get("use_channels", default_use_channels)
     if len(tip_types) != len(use_channels):
       raise ValueError("Length of tip_types must match length of use_channels.")
@@ -197,13 +198,16 @@ class EnhancedLiquidHandler(LiquidHandler):
     self,
     resources: Sequence[Container],
     vols: List[float],
-    use_channels: Optional[List[int]] = None,
     liquid_height: Optional[List[Optional[float]]] = None,
     **backend_kwargs,
   ):
     if not isinstance(resources, Sequence) or isinstance(resources, str):
         resources = [resources]
     self._check_containers(resources)
+
+    aspirate_kwargs = {**self.default_aspiration_params, **backend_kwargs}
+    use_channels = aspirate_kwargs.pop("use_channels", None)
+
     use_channels_was_provided = use_channels is not None
     if not use_channels_was_provided:
         if self._default_use_channels is not None:
@@ -225,25 +229,25 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
         for i, channel in enumerate(use_channels):
-            await self.aspirate(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
+            channel_aspirate_kwargs = backend_kwargs.copy()
+            channel_aspirate_kwargs["use_channels"] = [channel]
+            await self.aspirate(resources=resources, vols=[vols[i]], **channel_aspirate_kwargs)
         return
 
     resources = adjust_resources_for_pipetting(resources, len(use_channels))
 
-    merged_backend_kwargs = {**self.default_aspiration_params, **backend_kwargs}
-
     if liquid_height is None and does_volume_tracking():
         liquid_height = [r.compute_height_from_volume(r.tracker.get_used_volume()) if self._is_compute_height_from_volume_implemented(r) else None for r in resources]
 
-    if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
+    if "immersion_depth" not in aspirate_kwargs and liquid_height is not None:
         immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
-        merged_backend_kwargs["immersion_depth"] = immersion_depths
+        aspirate_kwargs["immersion_depth"] = immersion_depths
 
-    if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
-        lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
-        merged_backend_kwargs["lld_mode"] = lld_modes
+    # if "lld_mode" not in aspirate_kwargs and does_volume_tracking():
+    #     lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
+    #     aspirate_kwargs["lld_mode"] = lld_modes
 
-    if "surface_following_distance" not in merged_backend_kwargs and does_volume_tracking():
+    if "surface_following_distance" not in aspirate_kwargs and does_volume_tracking():
         resource_to_total_vol = {}
         for i, r in enumerate(resources):
             r_id = id(r)
@@ -264,14 +268,14 @@ class EnhancedLiquidHandler(LiquidHandler):
             sfd_list.append(sfd)
 
         if can_compute_sfd:
-            merged_backend_kwargs["surface_following_distance"] = sfd_list
+            aspirate_kwargs["surface_following_distance"] = sfd_list
 
     await super().aspirate(
         resources=resources,
         vols=vols,
         use_channels=use_channels,
         liquid_height=liquid_height,
-        **merged_backend_kwargs,
+        **aspirate_kwargs,
     )
 
   @need_setup_finished
@@ -279,13 +283,16 @@ class EnhancedLiquidHandler(LiquidHandler):
     self,
     resources: Sequence[Container],
     vols: List[float],
-    use_channels: Optional[List[int]] = None,
     liquid_height: Optional[List[Optional[float]]] = None,
     **backend_kwargs,
   ):
     if not isinstance(resources, Sequence) or isinstance(resources, str):
         resources = [resources]
     self._check_containers(resources)
+
+    dispense_kwargs = {**self.default_dispense_params, **backend_kwargs}
+    use_channels = dispense_kwargs.pop("use_channels", None)
+
     use_channels_was_provided = use_channels is not None
     if not use_channels_was_provided:
         if self._default_use_channels is not None:
@@ -307,7 +314,9 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
         for i, channel in enumerate(use_channels):
-            await self.dispense(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
+            channel_dispense_kwargs = backend_kwargs.copy()
+            channel_dispense_kwargs["use_channels"] = [channel]
+            await self.dispense(resources=resources, vols=[vols[i]], **channel_dispense_kwargs)
         return
 
     resources = adjust_resources_for_pipetting(resources, len(use_channels))
@@ -315,22 +324,20 @@ class EnhancedLiquidHandler(LiquidHandler):
     if liquid_height is None and does_volume_tracking():
         liquid_height = [r.compute_height_from_volume(r.tracker.get_used_volume()) if self._is_compute_height_from_volume_implemented(r) else None for r in resources]
 
-    merged_backend_kwargs = {**self.default_dispense_params, **backend_kwargs}
-
-    if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
+    if "immersion_depth" not in dispense_kwargs and liquid_height is not None:
         immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
-        merged_backend_kwargs["immersion_depth"] = immersion_depths
+        dispense_kwargs["immersion_depth"] = immersion_depths
 
-    if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
-        lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
-        merged_backend_kwargs["lld_mode"] = lld_modes
+    # if "lld_mode" not in dispense_kwargs and does_volume_tracking():
+    #     lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
+    #     dispense_kwargs["lld_mode"] = lld_modes
 
     await super().dispense(
         resources=resources,
         vols=vols,
         use_channels=use_channels,
         liquid_height=liquid_height,
-        **merged_backend_kwargs,
+        **dispense_kwargs,
     )
 
   @need_setup_finished
@@ -372,7 +379,13 @@ class EnhancedLiquidHandler(LiquidHandler):
         vols = [vols]
 
     if use_channels is None:
-      use_channels = list(range(len(vols)))
+      if self.simulation:
+        use_channels = list(range(len(vols)))
+      else:
+        use_channels = list(
+            range(self.num_channels - 1, self.num_channels - 1 - len(vols), -1)
+        )
+        use_channels.sort()
 
     # 1. Pick up tips
     if tip_types is not None:
@@ -391,12 +404,14 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     # 2. Aspirate
     aspirate_kwargs = aspirate_kwargs or {}
+    aspirate_kwargs["use_channels"] = use_channels
     print(source_wells)
     print(vols)
     await self.aspirate(resources=source_wells, vols=vols, **aspirate_kwargs)
 
     # 3. Dispense
     dispense_kwargs = dispense_kwargs or {}
+    dispense_kwargs["use_channels"] = use_channels
     print(dest_wells)
     print(vols)
     await self.dispense(resources=dest_wells, vols=vols, **dispense_kwargs)

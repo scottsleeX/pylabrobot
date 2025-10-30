@@ -20,7 +20,7 @@ from pylabrobot.resources import (
     Trough,
 )
 from pylabrobot.liquid_handling.resources import adjust_resources_for_pipetting
-from pylabrobot.machines.machine import need_setup_finished
+from pylabrobot.machines.machine import need_refresh_finished
 from pylabrobot.liquid_handling.errors import ChannelizedError
 from pylabrobot.liquid_handling.backends import STARBackend
 
@@ -60,11 +60,11 @@ class EnhancedLiquidHandler(LiquidHandler):
     self._tip_spot_lists: dict[str, list[TipSpot]] = {}
     self.default_aspiration_params = default_aspiration_params or {}
     self.default_dispense_params = default_dispense_params or {}
-    # First setup should not be async, as it's called in constructor
-    self._sync_setup()
+    # First refresh should not be async, as it's called in constructor
+    self._sync_refresh()
 
-  def _sync_setup(self):
-    """ Synchronous version of setup for use in constructor. """
+  def _sync_refresh(self):
+    """ Synchronous version of refresh for use in constructor. """
     self._tip_spot_lists.clear()
     tip_racks = []
     for resource in self.deck.children:
@@ -88,10 +88,10 @@ class EnhancedLiquidHandler(LiquidHandler):
           self._tip_spot_lists[rack_type].append(spot)
 
 
-  async def setup(self):
-    """ Asynchronously setup the list of available tips from the tip racks on the deck. """
-    self._sync_setup()
-    # await super().setup()
+  async def refresh(self):
+    """ Asynchronously refresh the list of available tips from the tip racks on the deck. """
+    self._sync_refresh()
+    await super().setup()
 
   async def pick_up_tips(
     self,
@@ -144,7 +144,7 @@ class EnhancedLiquidHandler(LiquidHandler):
             spots_to_try = spots[i:i+num_tips]
             try:
               await super().pick_up_tips(spots_to_try, use_channels=use_channels, **kwargs)
-              await self.setup()
+              await self.refresh()
               return
             except ChannelizedError as e:
               for channel in e.errors:
@@ -186,7 +186,7 @@ class EnhancedLiquidHandler(LiquidHandler):
       except Exception:
         logger.error("An unexpected error occurred during tip pickup.")
         raise
-    await self.setup()
+    await self.refresh()
 
   def _is_compute_height_from_volume_implemented(self, resource: Container) -> bool:
     try:
@@ -195,7 +195,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     except NotImplementedError:
         return False
 
-  @need_setup_finished
+  @need_refresh_finished
   async def aspirate(
     self,
     resources: Sequence[Container],
@@ -280,7 +280,7 @@ class EnhancedLiquidHandler(LiquidHandler):
         **aspirate_kwargs,
     )
 
-  @need_setup_finished
+  @need_refresh_finished
   async def dispense(
     self,
     resources: Sequence[Container],
@@ -342,7 +342,7 @@ class EnhancedLiquidHandler(LiquidHandler):
         **dispense_kwargs,
     )
 
-  @need_setup_finished
+  @need_refresh_finished
   async def transfer_chunk(
     self,
     source_wells: Union[Sequence[Well], Well],

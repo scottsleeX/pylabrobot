@@ -87,11 +87,11 @@ class EnhancedLiquidHandler(LiquidHandler):
         if spot.has_tip():
           self._tip_spot_lists[rack_type].append(spot)
 
-    super().setup()
 
   async def setup(self):
     """ Asynchronously setup the list of available tips from the tip racks on the deck. """
     self._sync_setup()
+    await super().setup()
 
   async def pick_up_tips(
     self,

@@ -91,7 +91,7 @@ class EnhancedLiquidHandler(LiquidHandler):
   async def refresh(self):
     """ Asynchronously refresh the list of available tips from the tip racks on the deck. """
     self._sync_refresh()
-    await super().setup()
+    # await super().setup()
 
   async def pick_up_tips(
     self,

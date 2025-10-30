@@ -200,7 +200,6 @@ class EnhancedLiquidHandler(LiquidHandler):
     self,
     resources: Sequence[Container],
     vols: List[float],
-    liquid_height: Optional[List[Optional[float]]] = None,
     **backend_kwargs,
   ):
     if not isinstance(resources, Sequence) or isinstance(resources, str):
@@ -209,6 +208,7 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     aspirate_kwargs = {**self.default_aspiration_params, **backend_kwargs}
     use_channels = aspirate_kwargs.pop("use_channels", None)
+    liquid_height = aspirate_kwargs.pop("liquid_height", None)
 
     use_channels_was_provided = use_channels is not None
     if not use_channels_was_provided:
@@ -285,7 +285,6 @@ class EnhancedLiquidHandler(LiquidHandler):
     self,
     resources: Sequence[Container],
     vols: List[float],
-    liquid_height: Optional[List[Optional[float]]] = None,
     **backend_kwargs,
   ):
     if not isinstance(resources, Sequence) or isinstance(resources, str):
@@ -294,6 +293,7 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     dispense_kwargs = {**self.default_dispense_params, **backend_kwargs}
     use_channels = dispense_kwargs.pop("use_channels", None)
+    liquid_height = dispense_kwargs.pop("liquid_height", None)
 
     use_channels_was_provided = use_channels is not None
     if not use_channels_was_provided:

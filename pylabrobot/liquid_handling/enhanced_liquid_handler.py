@@ -60,11 +60,11 @@ class EnhancedLiquidHandler(LiquidHandler):
     self._tip_spot_lists: dict[str, list[TipSpot]] = {}
     self.default_aspiration_params = default_aspiration_params or {}
     self.default_dispense_params = default_dispense_params or {}
-    # First refresh should not be async, as it's called in constructor
-    self._sync_refresh()
+    # First setup should not be async, as it's called in constructor
+    self._sync_setup()
 
-  def _sync_refresh(self):
-    """ Synchronous version of refresh for use in constructor. """
+  def _sync_setup(self):
+    """ Synchronous version of setup for use in constructor. """
     self._tip_spot_lists.clear()
     tip_racks = []
     for resource in self.deck.children:
@@ -87,9 +87,11 @@ class EnhancedLiquidHandler(LiquidHandler):
         if spot.has_tip():
           self._tip_spot_lists[rack_type].append(spot)
 
-  async def refresh(self):
-    """ Asynchronously refresh the list of available tips from the tip racks on the deck. """
-    self._sync_refresh()
+    super().setup()
+
+  async def setup(self):
+    """ Asynchronously setup the list of available tips from the tip racks on the deck. """
+    self._sync_setup()
 
   async def pick_up_tips(
     self,
@@ -142,7 +144,7 @@ class EnhancedLiquidHandler(LiquidHandler):
             spots_to_try = spots[i:i+num_tips]
             try:
               await super().pick_up_tips(spots_to_try, use_channels=use_channels, **kwargs)
-              await self.refresh()
+              await self.setup()
               return
             except ChannelizedError as e:
               for channel in e.errors:
@@ -184,7 +186,7 @@ class EnhancedLiquidHandler(LiquidHandler):
       except Exception:
         logger.error("An unexpected error occurred during tip pickup.")
         raise
-    await self.refresh()
+    await self.setup()
 
   def _is_compute_height_from_volume_implemented(self, resource: Container) -> bool:
     try:
@@ -206,6 +208,7 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     aspirate_kwargs = {**self.default_aspiration_params, **backend_kwargs}
     use_channels = aspirate_kwargs.pop("use_channels", None)
+    liquid_height = aspirate_kwargs.pop("liquid_height", None)
 
     use_channels_was_provided = use_channels is not None
     if not use_channels_was_provided:
@@ -272,6 +275,8 @@ class EnhancedLiquidHandler(LiquidHandler):
     await super().aspirate(
         resources=resources,
         vols=vols,
+        use_channels=use_channels,
+        liquid_height=liquid_height,
         **aspirate_kwargs,
     )
 
@@ -288,6 +293,7 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     dispense_kwargs = {**self.default_dispense_params, **backend_kwargs}
     use_channels = dispense_kwargs.pop("use_channels", None)
+    liquid_height = dispense_kwargs.pop("liquid_height", None)
 
     use_channels_was_provided = use_channels is not None
     if not use_channels_was_provided:
@@ -331,6 +337,8 @@ class EnhancedLiquidHandler(LiquidHandler):
     await super().dispense(
         resources=resources,
         vols=vols,
+        use_channels=use_channels,
+        liquid_height=liquid_height,
         **dispense_kwargs,
     )
 

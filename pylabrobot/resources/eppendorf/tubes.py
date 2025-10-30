@@ -120,21 +120,23 @@ def _compute_height_from_volume_Eppendorf_5mL_Vb(V: float) -> float:
 
 
 
-def Eppendorf_DNA_LoBind_1_5ml_Vb(name: str) -> Tube:
-  """1.5 mL round-bottom snap-cap Eppendorf tube. cat. no.: 022431021
+def Eppendorf_DNA_LoBind_1_5ml_Vb(name: str, model="Eppendorf_DNA_LoBind_1_5ml_Vb") -> Tube:
+  """1.5 mL round-bottom snap-cap Eppendorf tube.
+
+  cat. no.: 022431021 (Eppendorf™ DNA LoBind™ Tubes)
 
   - bottom_type=TubeBottomType.V
   - snap-cap lid
   """
-  # material_z_thickness = 2.4 mm
-  diameter = 17
+  diameter = 10.33
   return Tube(
     name=name,
     size_x=diameter,
     size_y=diameter,
-    size_z=39,
+    size_z=39.5,
     model="Eppendorf_DNA_LoBind_1_5ml_Vb",
-    max_volume=1_400,  # units: ul
+    max_volume=1_400,
+    material_z_thickness=0.8,
   )
 
 
@@ -180,3 +182,11 @@ def Eppendorf_5ml_Vb(name: str) -> Tube:
     compute_volume_from_height=_compute_volume_from_height_Eppendorf_5mL_Vb,
     compute_height_from_volume=_compute_height_from_volume_Eppendorf_5mL_Vb
   )
+def Eppendorf_Protein_LoBind_1_5ml_Vb(name: str) -> Tube:
+  """1.5 mL round-bottom screw-cap Eppendorf tube.
+
+  cat. no.: 022431081 (Eppendorf™ Protein LoBind™ Tubes)
+
+  Same as Eppendorf_DNA_LoBind_1_5ml_Vb
+  """
+  return Eppendorf_DNA_LoBind_1_5ml_Vb(name=name, model="Eppendorf_Protein_LoBind_1_5ml_Vb")

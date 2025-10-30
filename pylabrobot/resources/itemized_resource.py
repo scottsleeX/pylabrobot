@@ -428,6 +428,16 @@ class ItemizedResource(Resource, Generic[T], metaclass=ABCMeta):
         return identifier
     raise ValueError(f"Item {item} not found in resource.")
 
+  def get_child_column(self, item: T) -> int:
+    """Get the column of the item."""
+    identifier = self.get_child_identifier(item)
+    return int(identifier[1:]) - 1  # convert to 0-indexed
+
+  def get_child_row(self, item: T) -> int:
+    """Get the row of the item."""
+    identifier = self.get_child_identifier(item)
+    return LETTERS.index(identifier[0])  # convert to 0-indexed
+
   def get_all_items(self) -> List[T]:
     """Get all items in the resource. Items are in a 1D list, starting from the top left and going
     down, then right."""
@@ -473,6 +483,21 @@ class ItemizedResource(Resource, Generic[T], metaclass=ABCMeta):
     """Get all items in the given column."""
     return self[column * self.num_items_y : (column + 1) * self.num_items_y]
 
-  def row(self, row: int) -> List[T]:
-    """Get all items in the given row."""
+  def row(self, row: Union[int, str]) -> List[T]:
+    """Get all items in the given row.
+
+    Args:
+      row: The row index. Either an integer starting at ``0`` or a letter
+        ``"A"``-``"P"`` (case insensitive) corresponding to ``0``-``15``.
+
+    Raises:
+      ValueError: If ``row`` is a string outside ``"A"``-``"P"``.
+    """
+
+    if isinstance(row, str):
+      letter = row.upper()
+      if letter not in LETTERS[:16]:
+        raise ValueError("Row must be between 'A' and 'P'.")
+      row = LETTERS.index(letter)
+
     return self[row :: self.num_items_y]

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from typing import List, Optional, Tuple, Callable, Union, Sequence
+=======
+from typing import Callable, List, Optional, Tuple
+>>>>>>> upstream/main
 
 from pylabrobot.resources.container import Container
 from pylabrobot.resources.errors import ResourceNotFoundError
@@ -31,7 +35,10 @@ class Tube(WellContainer, Container):
     material_z_thickness: Optional[float] = None,
     category: str = "tube",
     model: Optional[str] = None,
+<<<<<<< HEAD
     bottom_type: Union[TubeBottomType, str] = TubeBottomType.UNKNOWN,
+=======
+>>>>>>> upstream/main
     compute_volume_from_height: Optional[Callable[[float], float]] = None,
     compute_height_from_volume: Optional[Callable[[float], float]] = None,
   ):

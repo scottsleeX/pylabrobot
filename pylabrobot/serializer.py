@@ -19,7 +19,7 @@ JSON: TypeAlias = Union[Dict[str, "JSON"], List["JSON"], str, int, float, bool, 
 def get_plr_class_from_string(klass_type: str):
   import pylabrobot.centrifuge as centrifuge_module
   import pylabrobot.config as config_module
-  import pylabrobot.gui as gui_module
+  # import pylabrobot.gui as gui_module
   import pylabrobot.heating_shaking as heating_shaking_module
   import pylabrobot.io as io_module
   import pylabrobot.liquid_handling as liquid_handling_module
@@ -43,7 +43,7 @@ def get_plr_class_from_string(klass_type: str):
   modules = [
     centrifuge_module,
     config_module,
-    gui_module,
+    # gui_module,
     heating_shaking_module,
     storage_module,
     io_module,

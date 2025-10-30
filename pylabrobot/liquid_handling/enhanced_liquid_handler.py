@@ -20,7 +20,7 @@ from pylabrobot.resources import (
     Trough,
 )
 from pylabrobot.liquid_handling.resources import adjust_resources_for_pipetting
-from pylabrobot.machines.machine import need_refresh_finished
+from pylabrobot.machines.machine import need_setup_finished
 from pylabrobot.liquid_handling.errors import ChannelizedError
 from pylabrobot.liquid_handling.backends import STARBackend
 
@@ -87,11 +87,9 @@ class EnhancedLiquidHandler(LiquidHandler):
         if spot.has_tip():
           self._tip_spot_lists[rack_type].append(spot)
 
-
   async def refresh(self):
     """ Asynchronously refresh the list of available tips from the tip racks on the deck. """
     self._sync_refresh()
-    # await super().setup()
 
   async def pick_up_tips(
     self,
@@ -195,7 +193,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     except NotImplementedError:
         return False
 
-  @need_refresh_finished
+  @need_setup_finished
   async def aspirate(
     self,
     resources: Sequence[Container],
@@ -280,7 +278,7 @@ class EnhancedLiquidHandler(LiquidHandler):
         **aspirate_kwargs,
     )
 
-  @need_refresh_finished
+  @need_setup_finished
   async def dispense(
     self,
     resources: Sequence[Container],
@@ -293,7 +291,6 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     dispense_kwargs = {**self.default_dispense_params, **backend_kwargs}
     use_channels = dispense_kwargs.pop("use_channels", None)
-    liquid_height = dispense_kwargs.pop("liquid_height", None)
 
     use_channels_was_provided = use_channels is not None
     if not use_channels_was_provided:
@@ -337,12 +334,10 @@ class EnhancedLiquidHandler(LiquidHandler):
     await super().dispense(
         resources=resources,
         vols=vols,
-        use_channels=use_channels,
-        liquid_height=liquid_height,
         **dispense_kwargs,
     )
 
-  @need_refresh_finished
+  @need_setup_finished
   async def transfer_chunk(
     self,
     source_wells: Union[Sequence[Well], Well],

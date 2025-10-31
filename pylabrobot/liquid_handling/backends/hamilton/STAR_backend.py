@@ -3129,7 +3129,7 @@ class STARBackend(HamiltonLiquidHandler, HamiltonHeaterShakerInterface):
       z_position=round(grip_height * 10),
       z_speed=round(z_speed * 10),
       open_gripper_position=round(grip_width * 10) + 30,
-      plate_width=round(grip_width * 10) - 30,
+      plate_width=round(grip_width * 10) - 50,
       grip_strength=grip_strength,
       minimum_traverse_height_at_beginning_of_a_command=round(
         (minimum_traverse_height_at_beginning_of_a_command or self._iswap_traversal_height) * 10

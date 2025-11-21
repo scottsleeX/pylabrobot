@@ -237,9 +237,9 @@ class EnhancedLiquidHandler(LiquidHandler):
     if liquid_height is None and does_volume_tracking():
         liquid_height = [r.compute_height_from_volume(r.tracker.get_used_volume()) if self._is_compute_height_from_volume_implemented(r) else None for r in resources]
 
-    if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
-        immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
-        merged_backend_kwargs["immersion_depth"] = immersion_depths
+    # if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
+    #     immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
+    #     merged_backend_kwargs["immersion_depth"] = immersion_depths
 
     # if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
     #     lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
@@ -319,9 +319,9 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     merged_backend_kwargs = {**self.default_dispense_params, **backend_kwargs}
 
-    if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
-        immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
-        merged_backend_kwargs["immersion_depth"] = immersion_depths
+    # if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
+    #     immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
+    #     merged_backend_kwargs["immersion_depth"] = immersion_depths
 
     # if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
     #     lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]

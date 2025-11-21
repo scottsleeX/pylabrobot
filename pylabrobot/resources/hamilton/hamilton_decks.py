@@ -463,7 +463,7 @@ class HamiltonSTARDeck(HamiltonDeck):
 
       self.assign_child_resource(
         resource=Trash("trash", size_x=0, size_y=241.2, size_z=0),
-        location=Coordinate(x=trash_x, y=190.6, z=150.1),
+        location=Coordinate(x=trash_x, y=190.6, z=137.1),
       )  # z I am not sure about
 
     self._trash96: Optional[Trash] = None

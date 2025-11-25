@@ -19,7 +19,7 @@ def BioRad_384_wellplate_50uL_Vb(name: str) -> Plate:
       Well,
       num_items_x=24,
       num_items_y=16,
-      dx=11.,
+      dx=10.,
       dy=7.44,
       dz=1.05,
       item_dx=4.5,

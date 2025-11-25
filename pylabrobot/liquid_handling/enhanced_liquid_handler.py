@@ -225,10 +225,10 @@ class EnhancedLiquidHandler(LiquidHandler):
         elif len(vols) != num_ops:
             raise ValueError(f"Length of `vols` ({len(vols)}) must be 1 or equal to inferred number of operations ({num_ops}).")
 
-    if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
-        for i, channel in enumerate(use_channels):
-            await self.aspirate(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
-        return
+    # if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
+    #     for i, channel in enumerate(use_channels):
+    #         await self.aspirate(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
+    #     return
 
     resources = adjust_resources_for_pipetting(resources, len(use_channels))
 
@@ -267,7 +267,7 @@ class EnhancedLiquidHandler(LiquidHandler):
 
         if can_compute_sfd:
             merged_backend_kwargs["surface_following_distance"] = sfd_list
-
+    print(resources,vols,use_channels,liquid_height)
     await super().aspirate(
         resources=resources,
         vols=vols,
@@ -345,7 +345,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     use_channels: Optional[List[int]] = None,
     aspirate_kwargs: Optional[dict] = None,
     dispense_kwargs: Optional[dict] = None,
-    drop_tips: bool = True,
+    mode: str = "P",
   ):
     """ Transfer a chunk of liquids from source wells to destination wells.
     This method performs a complete transfer operation for a chunk of transfers, which includes:
@@ -377,7 +377,7 @@ class EnhancedLiquidHandler(LiquidHandler):
       use_channels = list(range(len(vols)))
 
     # 1. Pick up tips
-    if tip_types is not None:
+    if "P" in mode:
       if isinstance(tip_types, str):
         tips_to_pick_up = [tip_types] * len(use_channels)
       else:
@@ -404,7 +404,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     await self.dispense(resources=dest_wells, vols=vols, use_channels=use_channels, **dispense_kwargs)
 
     # 4. Drop tips
-    if drop_tips:
+    if "D" in mode:
       trash = None
       for resource in self.deck.children:
         if isinstance(resource, Trash):

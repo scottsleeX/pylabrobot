@@ -1,0 +1,6 @@
+pylabrobot.resources.Tube.set\_well\_liquids
+============================================
+
+.. currentmodule:: pylabrobot.resources
+
+.. automethod:: Tube.set_well_liquids

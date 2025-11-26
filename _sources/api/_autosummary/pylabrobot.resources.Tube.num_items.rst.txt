@@ -1,0 +1,6 @@
+pylabrobot.resources.Tube.num\_items
+====================================
+
+.. currentmodule:: pylabrobot.resources
+
+.. autoproperty:: Tube.num_items

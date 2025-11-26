@@ -1,0 +1,6 @@
+pylabrobot.resources.Trough.set\_liquids
+========================================
+
+.. currentmodule:: pylabrobot.resources
+
+.. automethod:: Trough.set_liquids

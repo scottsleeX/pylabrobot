@@ -1,0 +1,6 @@
+pylabrobot.resources.Trough.enable\_volume\_trackers
+====================================================
+
+.. currentmodule:: pylabrobot.resources
+
+.. automethod:: Trough.enable_volume_trackers

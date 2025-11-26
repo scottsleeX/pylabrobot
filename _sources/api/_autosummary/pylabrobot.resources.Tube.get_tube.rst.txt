@@ -1,0 +1,6 @@
+pylabrobot.resources.Tube.get\_tube
+===================================
+
+.. currentmodule:: pylabrobot.resources
+
+.. automethod:: Tube.get_tube

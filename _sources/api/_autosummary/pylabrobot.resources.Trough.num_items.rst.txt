@@ -1,0 +1,6 @@
+pylabrobot.resources.Trough.num\_items
+======================================
+
+.. currentmodule:: pylabrobot.resources
+
+.. autoproperty:: Trough.num_items

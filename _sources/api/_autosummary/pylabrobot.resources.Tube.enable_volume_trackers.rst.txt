@@ -1,0 +1,6 @@
+pylabrobot.resources.Tube.enable\_volume\_trackers
+==================================================
+
+.. currentmodule:: pylabrobot.resources
+
+.. automethod:: Tube.enable_volume_trackers

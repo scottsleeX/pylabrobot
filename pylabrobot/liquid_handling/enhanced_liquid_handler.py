@@ -267,7 +267,7 @@ class EnhancedLiquidHandler(LiquidHandler):
 
         if can_compute_sfd:
             merged_backend_kwargs["surface_following_distance"] = sfd_list
-
+    print(resources,vols,use_channels,liquid_height)
     await super().aspirate(
         resources=resources,
         vols=vols,

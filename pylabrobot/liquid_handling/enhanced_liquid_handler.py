@@ -225,10 +225,10 @@ class EnhancedLiquidHandler(LiquidHandler):
         elif len(vols) != num_ops:
             raise ValueError(f"Length of `vols` ({len(vols)}) must be 1 or equal to inferred number of operations ({num_ops}).")
 
-    if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
-        for i, channel in enumerate(use_channels):
-            await self.aspirate(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
-        return
+    # if len(resources) == 1 and isinstance(resources[0], (Tube, Trough)) and len(use_channels) > 1:
+    #     for i, channel in enumerate(use_channels):
+    #         await self.aspirate(resources=resources, vols=[vols[i]], use_channels=[channel], **backend_kwargs)
+    #     return
 
     resources = adjust_resources_for_pipetting(resources, len(use_channels))
 
@@ -237,13 +237,13 @@ class EnhancedLiquidHandler(LiquidHandler):
     if liquid_height is None and does_volume_tracking():
         liquid_height = [r.compute_height_from_volume(r.tracker.get_used_volume()) if self._is_compute_height_from_volume_implemented(r) else None for r in resources]
 
-    # if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
-    #     immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
-    #     merged_backend_kwargs["immersion_depth"] = immersion_depths
+    if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
+        immersion_depths = [min(lh, 0.2) if lh is not None else None for lh in liquid_height]
+        merged_backend_kwargs["immersion_depth"] = immersion_depths
 
-    # if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
-    #     lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
-    #     merged_backend_kwargs["lld_mode"] = lld_modes
+    if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
+        lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
+        merged_backend_kwargs["lld_mode"] = lld_modes
 
     if "surface_following_distance" not in merged_backend_kwargs and does_volume_tracking():
         resource_to_total_vol = {}
@@ -319,10 +319,9 @@ class EnhancedLiquidHandler(LiquidHandler):
 
     merged_backend_kwargs = {**self.default_dispense_params, **backend_kwargs}
 
-    # if "immersion_depth" not in merged_backend_kwargs and liquid_height is not None:
-    #     immersion_depths = [min(lh, 2.0) if lh is not None else None for lh in liquid_height]
-    #     merged_backend_kwargs["immersion_depth"] = immersion_depths
-
+    if "blow_out_air_volume" not in merged_backend_kwargs and liquid_height is not None:
+        blow_out_air_volume = [10.0 for _ in resources]
+        merged_backend_kwargs["blow_out_air_volume"] = blow_out_air_volume
     # if "lld_mode" not in merged_backend_kwargs and does_volume_tracking():
     #     lld_modes = [STARBackend.LLDMode.GAMMA if r.tracker.get_used_volume() > 0 else STARBackend.LLDMode.Z_TOUCH_OFF for r in resources]
     #     merged_backend_kwargs["lld_mode"] = lld_modes
@@ -345,7 +344,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     use_channels: Optional[List[int]] = None,
     aspirate_kwargs: Optional[dict] = None,
     dispense_kwargs: Optional[dict] = None,
-    drop_tips: bool = True,
+    mode: str = "P",
   ):
     """ Transfer a chunk of liquids from source wells to destination wells.
     This method performs a complete transfer operation for a chunk of transfers, which includes:
@@ -377,7 +376,7 @@ class EnhancedLiquidHandler(LiquidHandler):
       use_channels = list(range(len(vols)))
 
     # 1. Pick up tips
-    if tip_types is not None:
+    if "P" in mode:
       if isinstance(tip_types, str):
         tips_to_pick_up = [tip_types] * len(use_channels)
       else:
@@ -404,7 +403,7 @@ class EnhancedLiquidHandler(LiquidHandler):
     await self.dispense(resources=dest_wells, vols=vols, use_channels=use_channels, **dispense_kwargs)
 
     # 4. Drop tips
-    if drop_tips:
+    if "D" in mode:
       trash = None
       for resource in self.deck.children:
         if isinstance(resource, Trash):
